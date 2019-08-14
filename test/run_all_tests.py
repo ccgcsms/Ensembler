@@ -19,24 +19,26 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
     modules = []
     print("CHECKING Tests")
-    for test in test_files:
-        module_name = test[test.index("test"):].replace("/", ".").replace(".py", "")
+    for test_file in test_files:
+        module_name = test_file[test_file.index("test"):].replace("/", ".").replace(".py", "")
         #module_name = test.replace(os.path.dirname(root_dir)+".", "").replace("/", ".").replace(".py", "")
         modules.append(module_name)
 
     print("LOADING Tests")
     for test_file in modules:
         print("\tTry loading: ", test_file, "\n")
+        mod = __import__("Ensembler." + test_file, globals(), locals())
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
+        """
         try:
-            print(test_file)
             # If the module defines a suite() function, call it to get the suite.
-            mod = __import__(test_file, globals(), locals(), ['suite'])
+            mod = __import__("Ensembler."+test_file, globals(), locals(), ['suite'])
             suitefn = getattr(mod, 'suite')
             suite.addTest(suitefn())
         except (ImportError, AttributeError):
             # else, just load all the test cases from the module.
             suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
-
+        """
     try:
         print("RUNNING Tests")
         unittest.TextTestRunner().run(suite)

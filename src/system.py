@@ -230,7 +230,12 @@ class perturbedSystem(system):
                  temperature=temperature, position=position)
 
 
-    def init_state(self):
+    def init_state(self, initial_position=None):
+        if(type(initial_position) != type(None)):
+            self._currentPosition = initial_position
+        else:
+            self._currentPosition = self.randomPos()
+
         self.currentState = self.state(position=self._currentPosition, temperature=0,
                                        totEnergy=0, totPotEnergy=0, totKinEnergy=0,
                                        dhdpos=0, velocity=0,
@@ -248,7 +253,7 @@ class perturbedSystem(system):
         self._currentTotPot = self.totPot()
         self._currentTotKin = self.totKin()
         self._currentTotE = self._currentTotKin + self._currentTotPot
-        self.redene = self._currentTotE / (const.gas_constant / 1000.0 * self._currentPosition)
+        self.redene = np.divide(self._currentTotE, np.divide(const.gas_constant, np.multiply(1000.0, self._currentPosition)))[0][0]
 
     def updateLam(self, lam):
         self._currentLam = lam

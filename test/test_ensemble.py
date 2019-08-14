@@ -2,7 +2,7 @@ import unittest
 import os ,sys
 sys.path.append(os.path.dirname(__file__+"/.."))
 
-from Ensembler.src import system, integrator as integrators, potential1D as pot
+from Ensembler.src import system, integrator as integrators, potentials as pot
 from Ensembler.src import ensemble
 
 
@@ -10,7 +10,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
 
     RE = ensemble.ReplicaExchange
     integrator = integrators.monteCarloIntegrator()
-    potential = pot.harmonicOsc1D()
+    potential = pot.OneD.harmonicOsc1D()
     sys = system.system(potential=potential, integrator=integrator)
     group:ensemble.ReplicaExchange = None
 
@@ -94,7 +94,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_init(self):
         integrator = integrators.monteCarloIntegrator()
-        potential = pot.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc1D()
         sys = system.system(potential=potential, integrator=integrator)
 
         replicas =22
@@ -105,7 +105,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_run(self):
         integrator = integrators.monteCarloIntegrator()
-        potential = pot.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc1D()
         sys = system.system(potential=potential, integrator=integrator)
 
         replicas =22
@@ -117,7 +117,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_exchange_all(self):
         integrator = integrators.monteCarloIntegrator()
-        potential = pot.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc1D()
         sys = system.system(potential=potential, integrator=integrator)
 
         T_range=range(1, 10)
@@ -147,7 +147,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_exchange_none(self):
         integrator = integrators.positionVerletIntegrator()
-        potential = pot.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc1D()
         sys = system.system(potential=potential, integrator=integrator)
 
         T_range = range(1, 500, 100)
