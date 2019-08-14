@@ -1,6 +1,8 @@
 import unittest
-from src import system
-from src import integrator, potential1D
+
+from Ensembler.src.potentials import OneD as potential1D
+from Ensembler.src import system, integrator
+
 
 class test_System(unittest.TestCase):
     integ = integrator.monteCarloIntegrator()

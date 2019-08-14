@@ -1,5 +1,5 @@
 import unittest
-from Ensembler import potential1D as pot
+from Ensembler.src.potentials import ND as pot
 
 class test_envelopedPotential(unittest.TestCase):
     def test_calculating_Vr(self):

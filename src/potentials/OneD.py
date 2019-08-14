@@ -31,14 +31,20 @@ class _potential1DCls(ND._potentialNDCls):
         :return: returns the evaluated potential values
         :return type: t.List[float]
         """
-
+        print(positions)
         if(isinstance(positions, numbers.Number)):
-            return np.array(positions, ndmin=1)
+            return np.array(positions, ndmin=cls.nDim)
         elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):
-            return np.array(positions, ndmin=1)
+            return np.array(positions, ndmin=cls.nDim)
+        elif (isinstance(positions, Iterable) and type(positions) != type(None) and len(positions) == 1 and all([isinstance(x, numbers.Number) for x in positions[0]])):
+            return np.array(positions, ndmin=cls.nDim)
         else:
-            raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
-                len(positions)) + " potential Dimensions " + str(cls.nDim))
+            if(type(positions) == type(None) ):
+                raise Exception("potential got None as position")
+
+            else:
+                raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
+                    len(positions)) + " potential Dimensions " + str(cls.nDim))
 
     def ene(self, positions:(t.Iterable[float] or np.array or float)) -> (t.List[float] or float):
         '''
