@@ -167,7 +167,7 @@ def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
 
 
 
-def drawConveyorBelt(x, y, CapLam=0.1, M=8, drawArrows=False):
+def drawEnsembler2(x, y, CapLam=0.1, M=8, drawArrows=False):
     pSize=6.027
     goldRat=1.70
     lineWidth=1

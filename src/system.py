@@ -7,10 +7,11 @@ import numpy as np
 from typing import Iterable
 from numbers import Number
 import scipy.constants as const
-from ConveyorBelt.src import dataStructure as data
-from ConveyorBelt.src.potential1D import _potentialCls, _perturbedPotentialCls
-from ConveyorBelt.src.integrator import integrator as integratorCls
-from ConveyorBelt.src.conditions.conditions import Condition
+from Ensembler2.src import dataStructure as data
+from Ensembler2.src.potentials.OneD import _potential1DCls as _potentialCls, _perturbedPotential1DCls as _perturbedPotentialCls
+
+from Ensembler2.src.integrator import integrator as integratorCls
+from Ensembler2.src.conditions.conditions import Condition
 
 class system:
     '''

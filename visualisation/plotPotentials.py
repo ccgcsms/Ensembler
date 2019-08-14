@@ -4,7 +4,7 @@ from matplotlib import colorbar
 import os, sys
 sys.path.append(os.path.dirname(__file__)+"/..")
 
-from ConveyorBelt.src import potential1D as pot
+from Ensembler2.src.potentials import OneD as pot, ND as nDPot
 import numpy as np
 
 #UTIL FUNCTIONS
@@ -20,7 +20,7 @@ def significant_decimals(s:float)->float:
     else:
         return s
 
-def plot_1DPotential(potential:pot._potentialCls, positions:list,
+def plot_1DPotential(potential:pot._potential1DCls, positions:list,
                      x_range=None, y_range=None, title:str=None, ax=None):
     # generat Data
     energies = potential.ene(positions=positions)
@@ -47,7 +47,7 @@ def plot_1DPotential(potential:pot._potentialCls, positions:list,
         return ax
     pass
 
-def plot_1DPotential_dhdpos(potential:pot._potentialCls, positions:list,
+def plot_1DPotential_dhdpos(potential:pot._potential1DCls, positions:list,
                             x_range=None, y_range=None, title:str=None, ax=None):
     # generat Data
     energies = potential.dhdpos(positions=positions)
@@ -75,7 +75,7 @@ def plot_1DPotential_dhdpos(potential:pot._potentialCls, positions:list,
     pass
 
 
-def plot_1DPotential_Term(potential: pot._potentialCls, positions: list,
+def plot_1DPotential_Term(potential: pot._potential1DCls, positions: list,
                           x_range=None, y_range=None, title: str = None, ax=None):
     fig, axes = plt.subplots(nrows=1, ncols=2)
     plot_1DPotential(potential=potential, positions=positions, ax=axes[0], x_range=x_range, y_range=y_range, title="Pot")
@@ -84,7 +84,7 @@ def plot_1DPotential_Term(potential: pot._potentialCls, positions: list,
     fig.suptitle(title) if(title!=None) else fig.suptitle("Potential "+str(potential.name))
     return fig, axes
 
-def plot_1DPotential_Termoverlay(potential:pot._potentialCls, positions:list,
+def plot_1DPotential_Termoverlay(potential:pot._potential1DCls, positions:list,
                                  x_range=None, y_range=None, title: str = None, ax=None):
     #generate dat
     energies = potential.ene(positions=positions)
@@ -113,7 +113,7 @@ def plot_1DPotential_Termoverlay(potential:pot._potentialCls, positions:list,
     else:
         return ax
 
-def plot_2DEnergy_landscape(potential1:pot._potentialCls, potential2:pot._potentialCls, positions1:list, positions2:list=None,
+def plot_2DEnergy_landscape(potential1:pot._potential1DCls, potential2:pot._potential1DCls, positions1:list, positions2:list=None,
                             x_range=None, y_range=None, z_range=None, title:str=None, colbar:bool=False, ax=None, cmap:str="inferno"):
     #generat Data
     energy_map = []
@@ -162,7 +162,7 @@ def plot_2DEnergy_landscape(potential1:pot._potentialCls, potential2:pot._potent
     return fig, ax, surf
 
 
-def plot_2perturbedEnergy_landscape(potential:pot._perturbedPotentialCls, positions:list, lambdas:list,
+def plot_2perturbedEnergy_landscape(potential:pot._perturbedPotential1DCls, positions:list, lambdas:list,
                                     x_range=None, lam_range=None, title:str=None, colbar:bool=False, ax=None):
 
     energy_map_lin = []
@@ -192,7 +192,7 @@ def plot_2perturbedEnergy_landscape(potential:pot._perturbedPotentialCls, positi
     return fig, ax, surf
 
 #show feature landscape per s
-def envPot_differentS_overlay_min0_plot(eds_potential:pot.envelopedPotential, s_values:list, positions:list,
+def envPot_differentS_overlay_min0_plot(eds_potential:nDPot.envelopedPotential, s_values:list, positions:list,
                                         y_range:tuple=None, hide_legend:bool=False, title:str=None, out_path:str=None):
     #generate energy values
     ys = []
@@ -227,7 +227,7 @@ def envPot_differentS_overlay_min0_plot(eds_potential:pot.envelopedPotential, s_
     return fig, axes
 
 #show feature landscape per s
-def envPot_differentS_overlay_plot(eds_potential:pot.envelopedPotential, s_values:list, positions:list,
+def envPot_differentS_overlay_plot(eds_potential:nDPot.envelopedPotential, s_values:list, positions:list,
                                    y_range:tuple=None, hide_legend:bool=False, title:str=None, out_path:str=None, axes=None):
     #generate energy values
     ys = []
@@ -264,7 +264,7 @@ def envPot_differentS_overlay_plot(eds_potential:pot.envelopedPotential, s_value
 
     return fig, axes
 
-def envPot_diffS_compare(eds_potential:pot.envelopedPotential, s_values:list, positions:list,
+def envPot_diffS_compare(eds_potential:nDPot.envelopedPotential, s_values:list, positions:list,
                          y_range:tuple=None,title:str=None, out_path:str=None):
     ##row/column ratio
     per_row =4
@@ -292,7 +292,7 @@ def envPot_diffS_compare(eds_potential:pot.envelopedPotential, s_values:list, po
     fig.show()
     return fig, axes
 
-def plot_envelopedPotential_system(eds_potential:pot.envelopedPotential, positions:list, s_value:float=None, Eoffi:list=None,
+def plot_envelopedPotential_system(eds_potential:nDPot.envelopedPotential, positions:list, s_value:float=None, Eoffi:list=None,
                                    y_range:tuple=None,title:str=None, out_path:str=None):
     if(s_value!=None):
         eds_potential.s = s_value       #set new s
@@ -327,7 +327,7 @@ def plot_envelopedPotential_system(eds_potential:pot.envelopedPotential, positio
     fig.show()
     return fig, axes
 
-def plot_envelopedPotential_2State_System(eds_potential:pot.envelopedPotential, positions:list, s_value:float=None, Eoffi:list=None,
+def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotential, positions:list, s_value:float=None, Eoffi:list=None,
                                           title:str=None, out_path:str=None, V_max:float=600, V_min:float=None):
     if(len(eds_potential.V_is)>2):
         raise IOError(__name__+" can only be used with two states in the potential!")
