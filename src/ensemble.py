@@ -9,7 +9,7 @@ import scipy.constants as const
 from typing import List, Dict, Tuple
 import copy
 import itertools as it
-from ConveyorBelt.src import system
+from Ensembler2.src import system
 
 class ReplicaExchange:
     ##Parameters

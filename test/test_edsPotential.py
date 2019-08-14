@@ -1,5 +1,5 @@
 import unittest
-from ConveyorBelt import potential1D as pot
+from Ensembler2 import potential1D as pot
 
 class test_envelopedPotential(unittest.TestCase):
     def test_calculating_Vr(self):

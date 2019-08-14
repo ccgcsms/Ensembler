@@ -1,9 +1,9 @@
 import unittest
 import os ,sys
-sys.path.append(os.path.dirname(__file__+"/../.."))
+sys.path.append(os.path.dirname(__file__+"/.."))
 
-from ConveyorBelt.src import system, integrator as integrators, potential1D as pot
-from ConveyorBelt.src import ensemble
+from Ensembler2.src import system, integrator as integrators, potential1D as pot
+from Ensembler2.src import ensemble
 
 
 class test_ReplicaExchangeCls(unittest.TestCase):
@@ -21,15 +21,15 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         self.RE.replicas = {}
 
     def test_init_1DREnsemble(self):
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
 
     def test_init_2DREnsemble(self):
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature", "mass"], parameter_Ranges=[range(288, 310), range(1,10)])
 
     def test_run_1DREnsemble(self):
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
         group.run()
 
@@ -37,7 +37,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         replicas =22
         nsteps = 100
         group = None
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
         self.group.nSteps_between_trials = nsteps
         self.group.run()
@@ -53,7 +53,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
     def test_getTotPot_1DREnsemble(self):
         replicas =22
         nsteps = 100
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
         self.group.nSteps_between_trials = nsteps
         self.group.run()
@@ -68,7 +68,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         param_range = range(288, 310)
         replicas =len(param_range)
         expected_pos= range(replicas)
-        from ConveyorBelt.src import ensemble
+        from Ensembler2.src import ensemble
         self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=param_range)
 
         initial_positions = sorted([self.group.replicas[replica]._currentPosition for replica in self.group.replicas])

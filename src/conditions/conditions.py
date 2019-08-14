@@ -3,7 +3,7 @@ Module: Conditions
     This module shall be used to implement subclasses of conditions like, thermostat or distance restraints
 """
 
-#from ConveyorBelt.src.system import system as sys
+#from Ensembler2.src.system import system as sys
 
 class Condition:
     _tau:float  #tau = apply every tau steps

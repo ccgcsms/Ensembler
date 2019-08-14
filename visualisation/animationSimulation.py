@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import os, sys
 sys.path.append(os.path.dirname(__file__)+"/..")
 
-from ConveyorBelt.src.system import system
+from Ensembler2.src.system import system
 
 def animation_trajectory(sys: system, x_range=None, title:str=None, out_path:str=None, out_writer:str="pillow", dpi:int=100)-> (animation.Animation, (str or None)):
     # plotting
