@@ -10,7 +10,7 @@ import numbers
 import scipy.constants as const
 from collections.abc import Iterable
 
-from Ensembler2.src.potentials import ND
+from Ensembler.src.potentials import ND
 
 class _potential1DCls(ND._potentialNDCls):
     '''
@@ -22,7 +22,7 @@ class _potential1DCls(ND._potentialNDCls):
     nDim:int = 1
 
     @classmethod
-    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> t.List[float]:
+    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
         """
             .. autofunction:: _check_positions_type
             This function is parsing and checking all possible inputs to avoid misuse of the functions.
@@ -33,14 +33,14 @@ class _potential1DCls(ND._potentialNDCls):
         """
 
         if(isinstance(positions, numbers.Number)):
-            return np.array([positions])
+            return np.array(positions, ndmin=1)
         elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):
-            return np.array(positions)
+            return np.array(positions, ndmin=1)
         else:
             raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
                 len(positions)) + " potential Dimensions " + str(cls.nDim))
 
-    def ene(self, positions:(t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def ene(self, positions:(t.Iterable[float] or np.array or float)) -> (t.List[float] or float):
         '''
         calculates energy of particle
         :param lam: alchemical parameter lambda
@@ -51,7 +51,7 @@ class _potential1DCls(ND._potentialNDCls):
         positions = self._check_positions_type(positions)
         return self._calculate_energies(positions)
 
-    def dhdpos(self, positions:(t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def dhdpos(self, positions:(t.Iterable[float] or np.array  or float)) -> (t.List[float] or float):
         '''
         calculates derivative with respect to position
         :param lam: alchemical parameter lambda
@@ -76,7 +76,7 @@ class flat_well1D(_potential1DCls):
     y_max:float = None
     y_min:float = None
 
-    def __init__(self, x_range: list = [0, 1], y_max: float = 1000, y_min: float = 0):
+    def __init__(self, x_range: list = (0, 1), y_max: float = 1000, y_min: float = 0):
         '''
         initializes flat well potential class
 
@@ -87,10 +87,10 @@ class flat_well1D(_potential1DCls):
         self.y_max = y_max
         self.y_min = y_min
 
-    def _calculate_energies(self, positions, *kargs):
+    def _calculate_energies(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.array([self.y_min if (pos >= self.x_min and pos <= self.x_max) else self.y_max for pos in positions])
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.zeros(len(positions))
 
 class harmonicOsc1D(_potential1DCls):
@@ -112,10 +112,10 @@ class harmonicOsc1D(_potential1DCls):
         self.x_shift = x_shift
         self.y_shift = y_shift
 
-    def _calculate_energies(self, positions: t.List[float], *kargs) -> (t.List[float]):
+    def _calculate_energies(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.array(list(map(lambda pos: 0.5 * self.fc * (pos - self.x_shift) ** 2 - self.y_shift, positions)))
 
-    def _calculate_dhdpos(self, positions: t.List[float], *kargs) -> (t.List[float]):
+    def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.array(list(map(lambda pos: self.fc * (pos - self.x_shift), positions)))
 
 class wavePotential1D(_potential1DCls):
@@ -195,9 +195,12 @@ class torsionPotential1D(_potential1DCls):
             raise IOError("the provided potential was not recognizable.")
 
 class coulombPotential1D(_potential1DCls):
+    name = "Coulomb Potential"
+
     epsilon:float
 
-    coulombLaw = lambda t, q1, q2, r, epsilon: (q1 * q2 / (r * epsilon * 4 * math.pi))
+    coulombLaw = lambda t, q1, q2, r, epsilon: np.divide(np.multiply(q1, q2), np.multiply(r, epsilon * 4 * math.pi))
+    dcoulombLawdr = lambda t, q1, q2, r, epsilon: np.divide(np.multiply(-q1, q2), np.multiply(np.square(r), epsilon * 4 * math.pi))
 
     def __init__(self, q1=1, q2=1, epsilon=1):
         self.q1 = q1
@@ -205,12 +208,13 @@ class coulombPotential1D(_potential1DCls):
         self.epsilon = epsilon
         pass
 
-    def _calculate_energies(self, distances: t.List[float], *kargs):
+    def _calculate_energies(self, distances: t.List[float]):
         coulombLaw_curry = lambda x: self.coulombLaw(self.q1, self.q2, x, self.epsilon)
         return np.array(list(map(coulombLaw_curry, distances)))
 
-    def _calculate_dhdpos(self, distances: t.List[float], *kargs):
-        raise NotImplemented("deviation not implemented yet")
+    def _calculate_dhdpos(self, distances: t.List[float]):
+        dcoulombLaw_currydr= lambda x: self.dcoulombLawdr(self.q1, self.q2, x, self.epsilon)
+        return np.array(list(map(dcoulombLaw_currydr, distances)))
 
 class lennardJonesPotential1D(_potential1DCls):
     '''
@@ -233,10 +237,10 @@ class lennardJonesPotential1D(_potential1DCls):
         x_shift = x_shift
         y_shift = y_shift
 
-    def _calculate_energies(self, positions, *kargs) -> t.List[float]:
+    def _calculate_energies(self, positions: (t.Iterable[float] or np.array or float)) -> np.array:
         return np.array([np.subtract(np.divide(self.c12, np.power(pos, 12)), np.divide(self.c6, np.power(pos, 6))) for pos in positions])
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), *kargs) -> t.List[float]:
+    def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.array([6 * ((2 * self.c12) - (pos ** 6 * self.c6)) / pos ** 13 for pos in positions])
 
 
@@ -262,12 +266,11 @@ class doubleWellPot1D(_potential1DCls):
         self.a = a
         self.b = b
 
-    def _calculate_energies(self, positions: t.List[float], *kargs) -> (t.List[float]):
-        return [self.Vmax / self.b ** 4 * ((pos - self.a / 2) ** 2 - self.b ** 2) ** 2 for pos in positions]
+    def _calculate_energies(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
+        return np.array([*map(lambda pos: self.Vmax / self.b ** 4 * ((pos - self.a / 2) ** 2 - self.b ** 2) ** 2, positions)])
 
-    def _calculate_dhdpos(self, positions: t.List[float], *kargs) -> (t.List[float]):
-        return [4 * self.Vmax / self.b ** 4 * ((pos - self.a / 2) ** 2 - self.b ** 2) * (pos - self.a / 2) for pos in
-                positions]
+    def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
+        return np.array([*map(lambda pos: 4 * self.Vmax / self.b ** 4 * ((pos - self.a / 2) ** 2 - self.b ** 2) * (pos - self.a / 2), positions)])
 
 
 """
@@ -337,28 +340,27 @@ class _perturbedPotential1DCls(_potential1DCls):
 
 class linCoupledHosc(_perturbedPotential1DCls):
     def __init__(self, ha=harmonicOsc1D(fc=1.0, x_shift=0.0), hb=harmonicOsc1D(fc=11.0, x_shift=0.0), lam=0):
-        super(_potential1DCls).__init__()
+        super(_perturbedPotential1DCls).__init__()
 
         self.ha = ha
         self.hb = hb
         self.lam = lam
-        self.couple_H = lambda Vab_t: (1.0 - self.lam) * Vab_t[0] + self.lam * Vab_t[1]
+        self.couple_H = lambda Va, Vb: (1.0 - self.lam) * Va + self.lam * Vb
 
-    def _calculate_energies(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        return list(map(self.couple_H, zip(self.ha.ene(positions), self.hb.ene(positions))))
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> (np.array or float):
+        return np.array(list(map(self.couple_H, self.ha.ene(positions), self.hb.ene(positions))))
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        return list(map(self.couple_H, zip(self.ha.dhdpos(self.lam, positions), self.hb.dhdpos(self.lam, positions))))
+    def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> (np.array or float):
+        return np.array(list(map(self.couple_H, self.ha.dhdpos(positions), self.hb.dhdpos(positions))))
 
-    def _calculate_dhdlam(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        return list(map(lambda Va_t, Vb_t: Vb_t - Va_t, self.ha.dhdpos(self.lam, positions),
-                        self.hb.dhdpos(self.lam, positions)))
+    def _calculate_dhdlam(self, positions: (t.List[float] or float)) -> (np.array or float):
+        return np.array(list(map(lambda Va_t, Vb_t: Vb_t - Va_t, self.ha.ene(positions), self.hb.ene(positions))))
 
 
 class expCoupledHosc(_perturbedPotential1DCls):
     def __init__(self, ha=harmonicOsc1D(fc=1.0, x_shift=0.0), hb=harmonicOsc1D(fc=11.0, x_shift=0.0), s=1.0, temp=300.0,
                  lam: float = 0.0):
-        super(_potential1DCls).__init__()
+        super(_perturbedPotential1DCls).__init__()
 
         self.ha = ha
         self.hb = hb
@@ -366,23 +368,25 @@ class expCoupledHosc(_perturbedPotential1DCls):
         self.beta = const.gas_constant / 1000.0 * temp
         self.lam = lam
 
-        self.couple_H = lambda V_t: -1.0 / (self.beta * self.s) * np.log(
-            self.lam * np.exp(-self.beta * self.s * V_t[0]) + (1.0 - self.lam) * np.exp(-self.beta * self.s * V_t[1]))
-        self.couple_H_dhdpos = lambda V_t: self.lam * V_t[1] * np.exp(-self.beta * self.s * V_t[1]) + (1.0 - self.lam) * \
-                                           V_t[0] * np.exp(-self.beta * self.s * V_t[0])
-        self.couple_H_dhdlam = lambda V_t: -1.0 / (self.beta * self.s) * 1.0 / (
-                    self.lam * np.exp(-self.beta * self.s * V_t[1]) + (1.0 - self.lam) * np.exp(
-                -self.beta * self.s * V_t[0])) * (np.exp(-self.beta * self.s * V_t[1]) - np.exp(
-            -self.beta * self.s * V_t[0]))
+        self.couple_H = lambda Va, Vb: -1.0 / (self.beta * self.s) * np.log(
+            self.lam * np.exp(-self.beta * self.s * Vb) + (1.0 - self.lam) * np.exp(-self.beta * self.s * Va))
 
-    def _calculate_energies(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        return list(map(self.couple_H, zip(self.ha.ene(positions), self.hb.ene(positions))))
+        self.couple_H_dhdpos = lambda Va, Vb: self.lam * Vb * np.exp(-self.beta * self.s * Vb) + (1.0 - self.lam) * \
+                                           Va * np.exp(-self.beta * self.s * Va)
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), lam: float = 1.0) -> (t.List[float] or float):
-        return list(map(self.couple_H_dhdpos, zip(self.ha.ene(positions), self.hb.ene(positions))))
+        self.couple_H_dhdlam = lambda Va,Vb: -1.0 / (self.beta * self.s) * 1.0 / (
+                    self.lam * np.exp(-self.beta * self.s * Vb) + (1.0 - self.lam) * np.exp(
+                -self.beta * self.s * Va)) * (np.exp(-self.beta * self.s * Vb) - np.exp(
+            -self.beta * self.s * Va))
 
-    def _calculate_dhdlam(self, positions: (t.List[float] or float), lam: float = 1.0) -> (t.List[float] or float):
-        return list(map(self.couple_H_dhdlam, zip(self.ha.ene(positions), self.hb.ene(positions))))
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> (np.array or float):
+        return np.array(list(map(self.couple_H, self.ha.ene(positions), self.hb.ene(positions))))
+
+    def _calculate_dhdpos(self, positions: (t.List[float] or float), lam: float = 1.0) -> (np.array or float):
+        return np.array(list(map(self.couple_H_dhdpos, self.ha.ene(positions), self.hb.ene(positions))))
+
+    def _calculate_dhdlam(self, positions: (t.List[float] or float), lam: float = 1.0) -> (np.array or float):
+        return np.array(list(map(self.couple_H_dhdlam, self.ha.ene(positions), self.hb.ene(positions))))
 
 
 class pertHarmonicOsc1D(_perturbedPotential1DCls):
@@ -405,19 +409,19 @@ class pertHarmonicOsc1D(_perturbedPotential1DCls):
         self.gamma = gamma
         self.lam = lam
 
-    def _calculate_energies(self, positions: (t.List[float] or float)) -> t.List[float]:
-        return [0.5 * (1.0 + self.alpha * self.lam) * self.fc * (pos - self.gamma * self.lam) ** 2 for pos in positions]
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> np.array:
+        return np.array([0.5 * (1.0 + self.alpha * self.lam) * self.fc * (pos - self.gamma * self.lam) ** 2 for pos in positions])
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> t.List[float]:
-        return [(1.0 + self.alpha * self.lam) * self.fc * (pos - self.gamma * self.lam) for pos in positions]
+    def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> np.array :
+        return np.array([(1.0 + self.alpha * self.lam) * self.fc * (pos - self.gamma * self.lam) for pos in positions])
 
-    def _calculate_dhdlam(self, positions: (t.List[float] or float)) -> t.List[float]:
-        return [0.5 * self.alpha * self.fc * (pos - self.gamma * self.lam) ** 2 - (
+    def _calculate_dhdlam(self, positions: (t.List[float] or float)) -> np.array :
+        return np.array([0.5 * self.alpha * self.fc * (pos - self.gamma * self.lam) ** 2 - (
                 1.0 + self.alpha * self.lam) * self.fc * self.gamma * (pos - self.gamma * self.lam) for pos in
-                positions]
+                positions])
 
 
-class envelopedDoubleWellPotential(ND.envelopedPotential):
+class envelopedDoubleWellPotential1D(ND.envelopedPotential):
     def __init__(self, y_shifts: list = None, x_shifts=None,
                  smoothing: float = 1, fcs=None):
         if (y_shifts == None):

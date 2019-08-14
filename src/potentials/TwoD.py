@@ -9,7 +9,7 @@ import numpy as np
 import math
 import typing as t
 
-from Ensembler2.src.potentials import ND
+from Ensembler.src.potentials import ND
 
 class potential2DCls(ND._potentialNDCls):
     '''

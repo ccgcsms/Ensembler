@@ -1,10 +1,10 @@
 import numpy as np
 import scipy.constants as const
 import copy
-from Ensembler2.src import system, potential1D
+from Ensembler.src import system, potential1D
 
 
-class Ensembler2:
+class Ensembler:
     '''
     Conveyor belt ensemble class
     organizes the replicas and their coupling
@@ -265,7 +265,7 @@ class Ensembler2:
         self.ene = 0.0
 
 
-def calc_traj(steps=1, ens=Ensembler2(0.0, 8)):
+def calc_traj(steps=1, ens=Ensembler(0.0, 8)):
     '''
     function to propagate the ensemble ens steps steps
     :param steps: (int) steps
@@ -278,7 +278,7 @@ def calc_traj(steps=1, ens=Ensembler2(0.0, 8)):
     return np.array(ens.systrajs), np.array(ens.traj)
 
 
-def calc_traj_file(steps=1, ens=Ensembler2(0.0, 8), filestring='traj'):
+def calc_traj_file(steps=1, ens=Ensembler(0.0, 8), filestring='traj'):
     '''
     function to propagate the ensemble ens steps steps and write to file with name filestring
     :param filestring: file name string

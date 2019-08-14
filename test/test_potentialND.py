@@ -5,7 +5,7 @@ import numbers
 from collections.abc import Iterable
 sys.path.append(os.path.dirname(__file__+"/../.."))
 
-from Ensembler2.src.potentials import ND as pot
+from Ensembler.src.potentials import ND as pot
 
 """
 TEST for Potentials 1D
@@ -256,3 +256,15 @@ class potentialCls_harmonicOsc1D(unittest.TestCase):
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         for Vexp, Vcalc in zip(expected_result, energies):
             self.assertEqual(first=Vexp, second=Vcalc, msg="The results were not correct!")
+
+class potentialCls_envelopedPotential(unittest.TestCase):
+    def test_energies(self):
+        raise NotImplementedError("Implement this test maaaaan!")
+    def test_dHdpos(self):
+        raise NotImplementedError("Implement this test maaaaan!")
+
+class potentialCls_envelopedPotentialMultiS(unittest.TestCase):
+    def test_energies(self):
+        raise NotImplementedError("Implement this test maaaaan!")
+    def test_dHdpos(self):
+        raise NotImplementedError("Implement this test maaaaan!")

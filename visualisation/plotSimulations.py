@@ -5,7 +5,7 @@ from matplotlib.figure import figaspect
 import os, sys
 sys.path.append(os.path.dirname(__file__)+"/..")
 
-from Ensembler2.src.system import system
+from Ensembler.src.system import system
 
 
 def static_sim_plots(sys: system, x_range: tuple = None, title: str = "", out_path: str = None) -> str:
