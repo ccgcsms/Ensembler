@@ -25,16 +25,17 @@ if __name__ == "__main__":
         modules.append(module_name)
 
     print("LOADING Tests")
-    for test in modules:
-        print("\tTry loading: ", test, "\n")
+    for test_file in modules:
+        print("\tTry loading: ", test_file, "\n")
         try:
+            print(test_file)
             # If the module defines a suite() function, call it to get the suite.
-            mod = __import__(test, globals(), locals(), ['suite'])
+            mod = __import__(test_file, globals(), locals(), ['suite'])
             suitefn = getattr(mod, 'suite')
             suite.addTest(suitefn())
         except (ImportError, AttributeError):
             # else, just load all the test cases from the module.
-            suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test))
+            suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
 
     try:
         print("RUNNING Tests")
