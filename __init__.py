@@ -1,3 +1,3 @@
-from Ensembler2.src import ensemble, integrator, potentials, system
-from Ensembler2 import visualisation
+from Ensembler.src import ensemble, integrator, potentials, system
+from Ensembler import visualisation
 

@@ -4,7 +4,7 @@ from matplotlib import colorbar
 import os, sys
 sys.path.append(os.path.dirname(__file__)+"/..")
 
-from Ensembler2.src.potentials import OneD as pot, ND as nDPot
+from Ensembler.src.potentials import OneD as pot, ND as nDPot
 import numpy as np
 
 #UTIL FUNCTIONS

@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from Ensembler2 import potential1D as pot
+from Ensembler import potential1D as pot
 
 class test_Integrators(unittest.TestCase):
     def test_Monte_Carlo_Integrator(self):

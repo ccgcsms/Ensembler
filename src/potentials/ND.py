@@ -16,14 +16,14 @@ class _potentialNDCls:
     name:str = "Unknown"
     nDim:int =-1
 
-    def __init__(self, *kargs):
+    def __init__(self):
         return
 
     def __name__(self)->str:
         return str(self.name)
 
     @classmethod
-    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> t.List[float]:
+    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
         """
             .. autofunction:: _check_positions_type
             This function is parsing and checking all possible inputs to avoid misuse of the functions.
@@ -43,13 +43,13 @@ class _potentialNDCls:
             raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
                 len(positions)))
 
-    def _calculate_energies(self, positions:t.List[float], *kargs):
+    def _calculate_energies(self, positions:t.List[float]):
         raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
 
-    def _calculate_dhdpos(self, positions:t.List[float], *kargs):
+    def _calculate_dhdpos(self, positions:t.List[float]):
         raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
 
-    def ene(self, positions:(t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def ene(self, positions:(t.List[float] or float)) -> (t.List[float] or float):
         '''
         calculates energy of particle
         :param lam: alchemical parameter lambda
@@ -60,7 +60,7 @@ class _potentialNDCls:
         positions = self._check_positions_type(positions)
         return self._calculate_energies(positions)
 
-    def dhdpos(self, positions:(t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def dhdpos(self, positions:(t.List[float] or float)) -> (t.List[float] or float):
         '''
         calculates derivative with respect to position
         :param lam: alchemical parameter lambda
@@ -96,10 +96,10 @@ class flat_wellND(_potentialNDCls):
         self.y_max = y_max
         self.y_min = y_min
 
-    def _calculate_energies(self, positions, *kargs):
+    def _calculate_energies(self, positions):
         return np.array([np.sum(list(map( lambda pos: self.y_min if (pos >= self.x_min and pos <= self.x_max) else self.y_max, dimPos))) for dimPos in positions])
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), *kargs) -> (t.List[float] or float):
+    def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
         return np.zeros(shape=len(positions))
 
 
@@ -122,11 +122,11 @@ class harmonicOscND(_potentialNDCls):
         self.x_shift = x_shift
         self.y_shift = y_shift
 
-    def _calculate_energies(self, positions: t.List[float], *kargs) -> (t.List[float]):
+    def _calculate_energies(self, positions: t.List[float]) -> (t.List[float]):
         return np.array([np.sum(list(map(lambda pos: 0.5 * self.fc * (pos - self.x_shift) ** 2 - self.y_shift, dimPos))) for dimPos in
                 positions])
 
-    def _calculate_dhdpos(self, positions: t.List[float], *kargs) -> (t.List[float]):
+    def _calculate_dhdpos(self, positions: t.List[float]) -> (t.List[float]):
         return np.array([np.sum(list(map(lambda pos: self.fc * (pos - self.x_shift), dimPos))) for dimPos in positions])
 
 """
@@ -239,7 +239,7 @@ class envelopedPotential(_potentialNDCls):
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
         return positions
 
-    def _calculate_energies(self, positions: (t.List[float] or float), *kargs) -> list:
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
         partA = [-self.s * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])]
         partB = [-self.s * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])]
         sum_prefactors = [max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))) for A_t, B_t in
@@ -255,7 +255,7 @@ class envelopedPotential(_potentialNDCls):
         Vr = [-1 / float(self.s) * partitionF for partitionF in sum_prefactors]
         return Vr
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), *kargs):
+    def _calculate_dhdpos(self, positions: (t.List[float] or float)):
         ###CHECK!THIS FUNC!!! not correct
         V_R_ene = self.ene(positions)
         V_Is_ene = [statePot.ene(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
@@ -319,7 +319,7 @@ class envelopedPotentialMultiS(envelopedPotential):
         self.s = s
         self.Eoff_i = Eoff_i
 
-    def _calculate_energies(self, positions: (t.List[float] or float), *kargs) -> list:
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
         partA = [-self.s[0] * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])]
         partB = [-self.s[1] * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])]
         sum_prefactors = [max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))) for A_t, B_t in
@@ -335,7 +335,7 @@ class envelopedPotentialMultiS(envelopedPotential):
         Vr = [- partitionF for state, partitionF in enumerate(sum_prefactors)]  # 1/ float(self.s[0]) *
         return Vr
 
-    def _calculate_dhdpos(self, positions: (t.List[float] or float), *kargs):
+    def _calculate_dhdpos(self, positions: (t.List[float] or float)):
         ###CHECK!THIS FUNC!!! not correct
         V_R_ene = self.ene(positions)
         V_Is_ene = [statePot.ene(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
