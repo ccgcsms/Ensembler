@@ -5,22 +5,30 @@ from Ensembler.src import system, integrator
 
 
 class test_System(unittest.TestCase):
-    integ = integrator.monteCarloIntegrator()
-    pot = potential1D.harmonicOsc1D()
-    conditions = []
-    temperature = 300
-    position = [0.1]
-    mass=[1]
+
 
     def test_system_constructor(self):
         """
         uses init_state, updateEne, randomPos, self.state
         :return:
         """
+        integ = integrator.monteCarloIntegrator()
+        pot = potential1D.harmonicOsc1D()
+        conditions = []
+        temperature = 300
+        position = [0.1]
+        mass = [1]
 
         sys = system.system(potential=self.pot, integrator=self.integ)
 
     def test_append_state(self):
+        integ = integrator.monteCarloIntegrator()
+        pot = potential1D.harmonicOsc1D()
+        conditions = []
+        temperature = 300
+        position = [0.1]
+        mass = [1]
+
         sys = system.system(potential=self.pot, integrator=self.integ)
         raise NotImplementedError("Implement this test maaaaan!")
 
