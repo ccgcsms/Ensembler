@@ -7,10 +7,11 @@ import numpy as np
 from typing import Iterable
 from numbers import Number
 import scipy.constants as const
+
 from Ensembler.src import dataStructure as data
 from Ensembler.src.potentials.OneD import _potential1DCls as _potentialCls, _perturbedPotential1DCls as _perturbedPotentialCls
 
-from Ensembler.src.integrator import integrator as integratorCls
+from Ensembler.src.integrator import _integratorCls
 from Ensembler.src.conditions.conditions import Condition
 
 class system:
@@ -24,7 +25,7 @@ class system:
 
     #settings:
     potential:_potentialCls = None
-    integrator:integratorCls = None
+    integrator:_integratorCls = None
     conditions=[]
     
     #parameters
@@ -39,14 +40,14 @@ class system:
     trajectory:Iterable = []
         
     #tmpvars - private:
-    _currentTotPot:float = None
-    _currentTotKin:float = None
-    _currentPosition:float = None
-    _currentVelocities:float = None
-    _currentForce:float = None
-    _currentTemperature:float = None
-        
-    def __init__(self, potential:_potentialCls, integrator:integratorCls, conditions:Iterable[Condition]=[],
+    _currentTotPot:(Number or Iterable[Number]) = None
+    _currentTotKin:(Number or Iterable[Number]) = None
+    _currentPosition:(Number or Iterable[Number]) = None
+    _currentVelocities:(Number or Iterable[Number]) = None
+    _currentForce:(Number or Iterable[Number]) = None
+    _currentTemperature:(Number or Iterable[Number]) = None
+
+    def __init__(self, potential:_potentialCls, integrator:_integratorCls, conditions:Iterable[Condition]=[],
                  temperature:float=298.0, position:float=None, mass:float=1):
 
         #params
@@ -55,10 +56,7 @@ class system:
         self.conditions = conditions
         self.temperature = temperature
         self.mass = mass
-
         self.nDim = potential.nDim
-
-
 
         #check if system is coupled to conditions:
         for condition in self.conditions:
@@ -68,9 +66,10 @@ class system:
                 condition.dt = self.integrator.dt
             else:
                 condition.dt=1
+
         #define dims of system. #Todo: only true for one dim Pot.
-        self.nDim = potential.nDim
         self.init_state(initial_position=position)
+
 
     def init_state(self, initial_position=None):
         if (initial_position == None):
@@ -91,9 +90,9 @@ class system:
                                         self._currentTotPot, self._currentTotKin,
                                         self._currentForce, self._currentVelocities)
 
-    def randomPos(self)-> Iterable[Iterable[Number]]:
-        pos = [[np.random.rand() * 20.0 - 10.0 for x in range(self.nDim)]]
-        return pos
+    @classmethod
+    def randomPos(cls)-> Iterable[Iterable[Number]]:
+        pos = [[np.random.rand() * 20.0 - 10.0 for x in range(cls.nDim)]]
 
     def append_state(self, newPosition, newVelocity, newForces):
         self._currentPosition = newPosition
@@ -187,7 +186,7 @@ class system:
             return 0
 
     def totPot(self)->float:
-        return sum(map(sum, self.potential.ene(self._currentPosition)))
+        return sum(self.potential.ene(self._currentPosition))
 
     def getPot(self)->Iterable[float]:
         return self.potential.ene(self._currentPosition)
@@ -222,7 +221,7 @@ class perturbedSystem(system):
     #
     _currentLam:float = None
 
-    def __init__(self, potential:_potentialCls, integrator: integratorCls, conditions: Iterable[Condition]=[],
+    def __init__(self, potential:_potentialCls, integrator: _integratorCls, conditions: Iterable[Condition]=[],
                  temperature: float = 298.0, position: float = None, lam:float=0.0):
 
         self._currentLam = lam

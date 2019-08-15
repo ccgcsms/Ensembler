@@ -27,8 +27,8 @@ if __name__ == "__main__":
 
     print("LOADING Tests")
     for test_file in modules:
-        print("\tTry loading: ", test_file, "\n")
-        mod = importlib.import_module(root_dir_name+"." + test_file, package=root_dir_path)
+        print("\tTry loading: ", root_dir_name+"." + test_file, "\n")
+        mod = importlib.import_module(root_dir_name+"." + test_file)
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
 
         """

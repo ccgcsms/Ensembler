@@ -3,20 +3,21 @@ Module: integrator
     This module shall be used to implement subclasses of integrator. The integrators are use for propagating simulatoins.
     Think about how to link conditions to integrator???
 """
+
 import numpy as np
 from typing import Tuple
 import scipy.constants as const
 
-#from src.system import system
-system = None
+from Ensembler.src import system
 
-class integrator:
+class _integratorCls:
     """
     autoclass: integrator
         This class is the parent class to all other classes.
     """
     #general:
     verbose:bool = False
+
     #Params
     maxStepSize:float = None
     minStepSize:float = None
@@ -54,7 +55,7 @@ class integrator:
 """
 Stochastic Integrators
 """
-class monteCarloIntegrator(integrator):
+class monteCarloIntegrator(_integratorCls):
     """
     ..autoclass: monteCarloIntegrator
         This class implements the classic monte carlo integrator.
@@ -198,18 +199,20 @@ class metropolisMonteCarloIntegrator(monteCarloIntegrator):
 """
 Newtonian Integrators
 """
-class newtonianIntegrator(integrator):
+class newtonianIntegrator(_integratorCls):
     currentPosition:float
     currentVelocity:float
     currentForces:float
 
     dt:float
 
-class verlocityVerletIntegrator(newtonianIntegrator):
+class velocityVerletIntegrator(newtonianIntegrator):
     """
         .. autoclass:: Verlocity Verlet Integrator,
         is not implemented yet
     """
+    def __init__(self, dt=0.0005):
+        self.dt = dt
 
     pass
 
