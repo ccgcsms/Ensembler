@@ -9,8 +9,9 @@ if __name__ == "__main__":
     os.chdir(root_dir_path)
     sys.path.append(root_dir_path)
 
-    print(".\t", os.listdir(root_dir_path))
-    print("./test/\t", os.listdir(root_dir_path + "/test"))
+    print(root_dir_path)
+    #print(".\t", os.listdir(root_dir_path))
+    #print("./test/\t", os.listdir(test_dir))
 
     #gather all test_files
     test_files = []
