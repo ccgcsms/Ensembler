@@ -27,7 +27,9 @@ if __name__ == "__main__":
     print("LOADING Tests")
     for test_file in modules:
         print("\tTry loading: ", test_file, "\n")
-        mod = __import__(test_file, globals(), locals())    #"Ensembler." + 
+        print(os.getcwd())
+        print(os.listdir(os.getcwd()))
+        mod = __import__("Ensembler." + test_file, globals(), locals())    #
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
         """
         try:
