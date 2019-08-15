@@ -31,7 +31,6 @@ class _potential1DCls(ND._potentialNDCls):
         :return: returns the evaluated potential values
         :return type: t.List[float]
         """
-        print(positions)
         if(isinstance(positions, numbers.Number)):  #single number
             return np.array(positions, ndmin=1)
         elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):  #list with numbers

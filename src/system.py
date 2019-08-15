@@ -32,12 +32,12 @@ class system:
     temperature:float = 298.0
     mass:float = 1 #for one particle systems!!!!
     nparticles:int =1 #Todo: adapt it to be multiple particles
-    nDim:int
+    nDim:int=-1
     initial_positions:Iterable[float]
     
     #output
     currentState:state = None
-    trajectory:Iterable = []
+    trajectory:list = []
         
     #tmpvars - private:
     _currentTotPot:(Number or Iterable[Number]) = None
@@ -48,7 +48,7 @@ class system:
     _currentTemperature:(Number or Iterable[Number]) = None
 
     def __init__(self, potential:_potentialCls, integrator:_integratorCls, conditions:Iterable[Condition]=[],
-                 temperature:float=298.0, position:float=None, mass:float=1):
+                 temperature:float=298.0, position:(Iterable[float] or float)=None, mass:float=1):
 
         #params
         self.potential = potential
@@ -72,42 +72,35 @@ class system:
 
 
     def init_state(self, initial_position=None):
+        #initial position given?
         if (initial_position == None):
-            initial_position = self.randomPos()
+            self.initial_positions  = self.randomPos()
+        else:
+            self.initial_positions = initial_position
 
-        self.initial_positions = initial_position
+        #set a new current_state
+        self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature)
 
-        self._currentPosition = self.initial_positions
-        self._currentForce = 0
-        self._currentVelocities = [0 for dim in range(self.potential.nDim)]
-        self._currentTemperature = self.temperature
-        self.currentState = self.state(self._currentPosition, self._currentTemperature,0, 0, 0, 0, 0)
-
-        self.updateEne()
-        
-        self.currentState =  self.state(self._currentPosition, self.temperature,
-                                        (self._currentTotKin+self._currentTotPot),
-                                        self._currentTotPot, self._currentTotKin,
-                                        self._currentForce, self._currentVelocities)
-
-    @classmethod
-    def randomPos(cls)-> Iterable[Iterable[Number]]:
-        pos = [[np.random.rand() * 20.0 - 10.0 for x in range(cls.nDim)]]
+    def randomPos(self)-> Iterable:
+        return np.subtract(np.multiply(np.random.rand(self.nDim),20),10)
 
     def append_state(self, newPosition, newVelocity, newForces):
         self._currentPosition = newPosition
         self._currentVelocities = newVelocity
         self._currentForce = newForces
 
-        self.updateEne()
         self.updateTemp()
-
-        self.currentState = self.state(self._currentPosition, self.temperature,
-                                       self._currentTotKin + self._currentTotPot,
-                                       self._currentTotPot, self._currentTotKin,
-                                       self._currentForce, self._currentVelocities)
+        self.updateEne()
+        self.updateCurrentState()
 
         self.trajectory.append(self.currentState)
+
+    def propagate(self):
+        self._currentPosition, self._currentVelocities, self._currentForce = self.integrator.step(self) #self.current_state)
+
+    def revertStep(self):
+        self.currentState = self.trajectory[-2]
+        return
 
     def simulate(self, steps:int, initSystem:bool=True, withdrawTraj:bool=False, save_every_state:int=1):
         
@@ -120,14 +113,14 @@ class system:
         if(withdrawTraj):
             self.trajectory = []
             
-        if(type(self._currentVelocities) == type(None) or initSystem):
+        if(initSystem): #type(self._currentVelocities) == type(None) or type(self._currentPosition) == type(None)
             self.initVel()
-        
-        if(type(self._currentPosition) == type(None) or initSystem):
-            self._currentPosition = self.randomPos()
-        
-        self.updateEne()    #inti E
+            self.init_state(initial_position=self.initial_positions)
+
+        self.updateCurrentState()
+
         if(show_progress): print("Progress: ", end="\t")
+        step = 0
         for step in range(steps):
             if(show_progress and step%block_length==0):
                 print(str(100*step//steps)+"%", end="\t")
@@ -145,12 +138,10 @@ class system:
             self.applyConditions()
 
             #Set new State
+            self.updateCurrentState()
 
-            self.currentState =  self.state(self._currentPosition, self.temperature,
-                                            self._currentTotKin + self._currentTotPot,
-                                            self._currentTotPot, self._currentTotKin,
-                                            self._currentForce, self._currentVelocities)
-
+        if(step%save_every_state != 0 ):
+            self.trajectory.append(self.currentState)
 
         if(show_progress): print("100%")
         return self.currentState
@@ -159,102 +150,147 @@ class system:
         for aditional in self.conditions:
             aditional.apply()
 
-
-    def randomShift(self):
-        posShift = (np.random.rand() * 2.0 - 1.0) * self.posShift
-        return posShift
-
     def initVel(self):
         self._currentVelocities = np.array([np.sqrt(const.gas_constant / 1000.0 * self.temperature / self.mass) * np.random.normal() for dim in range(self.nDim)])
         self.veltemp = self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2  # t
         return self._currentVelocities
 
-    def updateTemp(self, temperature:float):
-        self.temperature = temperature
-        self.alpha = 1.0
-        self.posShift = np.sqrt(0.5 * (1.0 + self.alpha * 0.5) * 1 / (const.gas_constant / 1000.0 * self.temperature))
-        self.updateEne()
+    def updateTemp(self):
+        """ this looks like a thermostat like thing! not implemented!@ TODO calc velocity from speed"""
+        self._currentTemperature = self._currentTemperature
 
     def updateEne(self):
         self._currentTotPot = self.totPot()
         self._currentTotKin = self.totKin()
 
+    def updateCurrentState(self):
+        self.currentState = self.state(self._currentPosition, self._currentTemperature,
+                                        (self._currentTotKin+self._currentTotPot),
+                                        self._currentTotPot, self._currentTotKin,
+                                        self._currentForce, self._currentVelocities)
+
     def totKin(self):
         if(self._currentVelocities != None):
-            return 0.5 * self.mass * np.linalg.norm(self._currentVelocities) ** 2  #Todo: velocities is a VECTOR not sum but vector length is needed
+            return 0.5 * self.mass * np.square(np.linalg.norm(self._currentVelocities))  #Todo: velocities is a VECTOR not sum but vector length is needed
         else:
             return 0
 
     def totPot(self)->float:
-        return sum(self.potential.ene(self._currentPosition))
+        return float(np.sum(self.potential.ene(self._currentPosition)))
 
     def getPot(self)->Iterable[float]:
         return self.potential.ene(self._currentPosition)
 
     def getTotEnergy(self):
         self.updateEne()
-        return self.totPot()+self.totKin()
+        return np.add(self.totPot(), self.totKin())
 
-    def propagate(self):
-        self._currentPosition, self._currentVelocities, self._currentForce = self.integrator.step(self) #self.current_state)
-
-    def revertStep(self):
-        self.currentState = self.trajectory[-2]
-        return
-    
     def getCurrentState(self)->state:
         return self.currentState
     
     def getTrajectory(self)->Iterable[state]:
         return self.trajectory
 
+    def set_current_state(self, currentPosition:(Number or Iterable), currentVelocities:(Number or Iterable)=0, currentForce:(Number or Iterable)=0, currentTemperature:Number=298):
+        self._currentPosition = currentPosition
+        self._currentForce = currentForce
+        self._currentVelocities = currentVelocities
+        self._currentTemperature = currentTemperature
+        self.currentState = self.state(self._currentPosition, self._currentTemperature,0, 0, 0, 0, 0)
+
+        self.updateEne()
+        self.updateCurrentState()
+
+    def set_Temperature(self, temperature):
+        """ this looks like a thermostat like thing! not implemented!@"""
+        self.temperature = temperature
+        self._currentTemperature = temperature
+        self.updateEne()
+
 class perturbedSystem(system):
     """
     
     """
 
-    #
+    #Lambda Dependend Settings
     state = data.lambdaState
     currentState: data.lambdaState
     potential: _perturbedPotentialCls
-
-    #
+    #current lambda
     _currentLam:float = None
+    _currentdHdLam:float = None
 
-    def __init__(self, potential:_potentialCls, integrator: _integratorCls, conditions: Iterable[Condition]=[],
-                 temperature: float = 298.0, position: float = None, lam:float=0.0):
+    def __init__(self, potential:_perturbedPotentialCls, integrator: _integratorCls, conditions: Iterable[Condition]=[],
+                 temperature: float = 298.0, position:(Iterable[Number] or float) = None, lam:float=0.0):
 
         self._currentLam = lam
+        if(not isinstance(potential, _perturbedPotentialCls)):
+            raise Exception("Potential: "+potential.name+" is not a potential of the _perturbedPotentialCls family! Please use these types for: "+__class__.__name__)
+        else:
+            if(hasattr(potential, "lam")):
+                setattr(potential, "lam", lam)
+            else:
+                Exception(
+                    "Potential: " + potential.name + " has not an attribute lam. But this attribute is needed for representing lambda! Please add the field for: " + __class__.__name__)
+
         super().__init__(potential=potential, integrator=integrator, conditions=conditions,
                  temperature=temperature, position=position)
 
 
     def init_state(self, initial_position=None):
-        if(type(initial_position) != type(None)):
-            self._currentPosition = initial_position
+        #initial position given?
+        if (initial_position == None):
+            self.initial_positions  = self.randomPos()
         else:
-            self._currentPosition = self.randomPos()
+            self.initial_positions = initial_position
 
-        self.currentState = self.state(position=self._currentPosition, temperature=0,
-                                       totEnergy=0, totPotEnergy=0, totKinEnergy=0,
-                                       dhdpos=0, velocity=0,
-                                       lamb=self._currentLam, dhdlam=0)
+        #set a new current_state
+        self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature, currentLambda=self._currentLam, currentdHdLam=self._currentdHdLam)
+
+    def set_current_state(self, currentPosition:(Number or Iterable), currentLambda:(Number or Iterable), currentVelocities:(Number or Iterable)=0,  currentdHdLam:(Number or Iterable)=0,
+                          currentForce:(Number or Iterable)=0, currentTemperature:Number=298):
+        self._currentPosition = currentPosition
+        self._currentForce = currentForce
+        self._currentVelocities = currentVelocities
+        self._currentTemperature = currentTemperature
+
+        self.currentState = self.state(position=self._currentPosition, temperature=self._currentTemperature,
+                                       totEnergy=0,
+                                       totPotEnergy=0, totKinEnergy=0,
+                                       dhdpos=self._currentForce, velocity=self._currentVelocities,
+                                       lam=self._currentLam, dhdlam=0)
+
         self.updateEne()
+        self.updateCurrentState()
 
-        self.currentState = self.state(position=self._currentPosition, temperature=self.temperature,
+    def updateCurrentState(self):
+        self.currentState = self.state(position=self._currentPosition, temperature=self._currentTemperature,
                                        totEnergy=(self._currentTotKin + self._currentTotPot),
                                        totPotEnergy=self._currentTotPot, totKinEnergy=self._currentTotKin,
                                        dhdpos=self._currentForce, velocity=self._currentVelocities,
-                                       lamb=self._currentLam, dhdlam=0)
+                                       lam=self._currentLam, dhdlam=self._currentdHdLam)
 
-        
+
+
+    """
     def updateEne(self):
         self._currentTotPot = self.totPot()
         self._currentTotKin = self.totKin()
         self._currentTotE = self._currentTotKin + self._currentTotPot
-        self.redene = np.divide(self._currentTotE, np.divide(const.gas_constant, np.multiply(1000.0, self._currentPosition)))[0][0]
+        self.redene = np.divide(self._currentTotE, np.divide(const.gas_constant, np.multiply(1000.0, self._currentPosition)))
+    """
+    def append_state(self, newPosition, newVelocity, newForces, newLam):
+        self._currentPosition = newPosition
+        self._currentVelocities = newVelocity
+        self._currentForce = newForces
+        self._currentLam = newLam
 
-    def updateLam(self, lam):
+        self.updateTemp()
+        self.updateEne()
+        self.updateCurrentState()
+        self.trajectory.append(self.currentState)
+
+    def set_lambda(self, lam):
         self._currentLam = lam
         self.omega = np.sqrt((1.0 + self.potential.alpha * self._currentLam) * self.potential.fc / self.mass)
         self.potential.set_lam(lam=self._currentLam)

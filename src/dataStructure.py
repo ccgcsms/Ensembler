@@ -12,7 +12,7 @@ basicState = namedtuple("State", ["position", "temperature",
 lambdaState = namedtuple("LState", ["position", "temperature",
                                    "totEnergy", "totPotEnergy", "totKinEnergy",
                                    "dhdpos",  "velocity",
-                                   "lamb", "dhdlam"])
+                                   "lam", "dhdlam"])
 
 envelopedPStstate = namedtuple("EState", ["position", "temperature",
                                          "totEnergy", "totPotEnergy", "totKinEnergy",
