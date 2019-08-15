@@ -14,7 +14,7 @@ class _potentialNDCls:
     potential base class
     '''
     name:str = "Unknown"
-    nDim:int =-1
+    nDim:int =0
 
     def __init__(self):
         return
@@ -33,15 +33,13 @@ class _potentialNDCls:
         :return type: t.List[float]
         """
 
-        if(isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions])):
-            return np.array(positions)
-        elif(isinstance(positions, numbers.Number)):
-            return np.array([[positions]])
-        elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):
-            return np.array([positions])
+        #array
+        if(isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions])
+            or isinstance(positions, Iterable) and (len(positions) == cls.nDim  or cls.nDim == 0) and all([isinstance(x, numbers.Number) for x in positions])
+            or isinstance(positions, numbers.Number)):
+            return np.array(positions, ndmin=2)
         else:
-            raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
-                len(positions)))
+            raise Exception("list dimensionality does not fit to potential dimensionality! Input: " + str(positions))
 
     def _calculate_energies(self, positions:t.List[float]):
         raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
@@ -70,8 +68,6 @@ class _potentialNDCls:
         positions = self._check_positions_type(positions)
         return self._calculate_dhdpos(positions)
 
-
-
 """
 standard potentials
 """
@@ -97,10 +93,11 @@ class flat_wellND(_potentialNDCls):
         self.y_min = y_min
 
     def _calculate_energies(self, positions):
-        return np.array([np.sum(list(map( lambda pos: self.y_min if (pos >= self.x_min and pos <= self.x_max) else self.y_max, dimPos))) for dimPos in positions])
+        return np.array([list(map(lambda pos: self.y_min if (pos >= self.x_min and pos <= self.x_max) else self.y_max, dimPos)) for dimPos in positions])
 
     def _calculate_dhdpos(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        return np.zeros(shape=len(positions))
+
+        return np.array([np.zeros(shape=len(positions[0])) for x in range(len(positions))], ndmin=2)
 
 
 class harmonicOscND(_potentialNDCls):
@@ -123,11 +120,11 @@ class harmonicOscND(_potentialNDCls):
         self.y_shift = y_shift
 
     def _calculate_energies(self, positions: t.List[float]) -> (t.List[float]):
-        return np.array([np.sum(list(map(lambda pos: 0.5 * self.fc * (pos - self.x_shift) ** 2 - self.y_shift, dimPos))) for dimPos in
+        return np.array([list(map(lambda pos: 0.5 * self.fc * (pos - self.x_shift) ** 2 - self.y_shift, dimPos)) for dimPos in
                 positions])
 
     def _calculate_dhdpos(self, positions: t.List[float]) -> (t.List[float]):
-        return np.array([np.sum(list(map(lambda pos: self.fc * (pos - self.x_shift), dimPos))) for dimPos in positions])
+        return np.array([list(map(lambda pos: self.fc * (pos - self.x_shift), dimPos)) for dimPos in positions])
 
 """
 Waves
@@ -179,8 +176,6 @@ class wavePotential1D(_potentialNDCls):
 """
     ENVELOPED POTENTIALS
 """
-
-
 class envelopedPotential(_potentialNDCls):
     """
     .. autoclass:: envelopedPotential
@@ -197,7 +192,7 @@ class envelopedPotential(_potentialNDCls):
         :param s:
         :param Eoff_i:
         """
-        super(_potentialNDCls).__init__()
+        super().__init__()
         self.numStates = len(V_is)
         if (self.numStates < 2):
             raise IOError("It does not make sense enveloping less than two potentials!")
@@ -219,67 +214,84 @@ class envelopedPotential(_potentialNDCls):
         self.Eoff_i = Eoff_i
 
     # each state gets a position list
-    def _check_positions_type(self, positions: t.List[float]) -> t.List[float]:
+    def _check_positions_type(self, positions: t.List[float]) -> np.array:
         if (type(positions) in [float, int, str]):
             if (len(positions) != self.numStates):
-                positions = [positions for state in range(self.numStates + 1)]
+                return np.array([positions for state in range(self.numStates + 1)], ndmin=3)
             else:
-                positions = [float(positions) for state in range(self.numStates + 1)]
+                return np.array([float(positions) for state in range(self.numStates + 1)], ndmin=3)
         elif (isinstance(positions, Iterable)):
             if (len(positions) != self.numStates):
-                if (isinstance(positions[0], Iterable)):  # Ndimensional case
-                    positions = [list(map(lambda dimlist: np.array(list(map(float, dimlist))), positions)) for state in
-                                 range(self.numStates)]
+                if (isinstance(positions[0], Iterable) and all([ isinstance(dimPos, numbers.Number) for pos in positions for dimPos in pos])):  # Ndimensional case
+                    return np.array([positions for state in range(self.numStates)], ndmin=3)
                 else:  # onedimensional
-                    positions = [list(map(float, positions)) for state in range(self.numStates)]
+                    return np.array([positions for state in range(self.numStates)], ndmin=3)
             else:  # TODO: insert check here! for fitting numstates
-                return positions
+                return np.array(positions, ndmin=3)
         else:
             raise Exception(
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
-        return positions
 
     def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
-        partA = [-self.s * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])]
-        partB = [-self.s * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])]
-        sum_prefactors = [max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))) for A_t, B_t in
-                          zip(partA, partB)]
+        print(positions.shape)
+        partA = np.array([-self.s * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])])
+        partB = np.array([-self.s * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])])
+        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
+                          zip(partA, partB)])
 
         # more than two states!
         for state in range(2, self.numStates):
             partN = [-self.s * (Vit - self.Eoff_i[state]) for Vit in self.V_is[state].ene(positions[state])]
-            sum_prefactors = [max(sum_prefactors_t, N_t) + math.log(
-                1 + math.exp(min(sum_prefactors_t, N_t) - max(sum_prefactors_t, N_t))) for sum_prefactors_t, N_t in
-                              zip(sum_prefactors, partN)]
+            sum_prefactors = np.array(
+                [list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
+                 for A, B in
+                 zip(sum_prefactors, partN)])
 
         Vr = [-1 / float(self.s) * partitionF for partitionF in sum_prefactors]
-        return Vr
+        return np.array(Vr)
 
     def _calculate_dhdpos(self, positions: (t.List[float] or float)):
+        """
+        :warning : Implementation is not entirly correct!
+        :param positions:
+        :return:
+        """
         ###CHECK!THIS FUNC!!! not correct
         V_R_ene = self.ene(positions)
-        V_Is_ene = [statePot.ene(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
-        V_Is_dhdpos = [statePot.dhdpos(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
+        V_Is_ene = np.array([statePot.ene(state_pos) for statePot, state_pos in zip(self.V_is, positions)])
+        V_Is_dhdpos = np.array([statePot.dhdpos(state_pos) for statePot, state_pos in zip(self.V_is, positions)])
         dhdpos = []
 
+        #print("POS: " , positions.shape,"\n\t", positions,)
+        #print("ene: ", V_Is_ene.shape,"\n\t", V_Is_ene)
+        #print("dhdpos: ", V_Is_dhdpos.shape,"\n\t", V_Is_dhdpos)
+        #print("T", V_Is_ene.T)
+        V_Is_posDim_eneSum = np.sum(V_Is_ene.T, axis=2).T
+        #print("sums: ", V_Is_posDim_eneSum.shape, "\n\t", V_Is_posDim_eneSum)
+
+        #prefactors = np.array([np.zeros(len(positions[0])) for x in range(len(positions))])
+        #todo: error this should be ref pot fun not sum of all pots
+
+        prefactors = np.array([list(map(lambda pos, posSum: list(map(lambda dimPos, dimPosSum: 1 - np.divide(dimPos, dimPosSum), pos, posSum)), Vn_ene, V_Is_posDim_eneSum)) for Vn_ene in V_Is_ene])
+        ##print("preFactors: ",prefactors.shape, "\n\t", prefactors,  "\n\t", prefactors.T)
+        dhdpos_state_scaled = np.multiply(prefactors, V_Is_dhdpos)
+        #print("dhdpos_scaled", dhdpos_state_scaled.shape, "\n\t", dhdpos_state_scaled, "\n\t", dhdpos_state_scaled.T    )
+
+        #dhdpos_R = [  for dhdpos_state in dhdpos_state_scaled]
+
+        dhdpos_R = []
         for position in range(len(positions[0])):
-            dhdpos_R = 0
-            dhdpos_state = []
-            for V_state_ene, V_state_dhdpos in zip(V_Is_ene, V_Is_dhdpos):
-                # den = sum([math.exp(-const.k *Vstate[position]) for Vstate in V_Is_ene])
-                # prefactor = (math.exp(-const.k *V_state_ene[position]))/den if (den!=0) else 0
-                if (V_state_ene[position] == 0):
-                    prefactor = 0
-                else:
-                    prefactor = 1 - (V_state_ene[position] / (sum([Vstate[position] for Vstate in V_Is_ene]))) if (
-                                sum([Vstate[position] for Vstate in V_Is_ene]) != 0) else 0
-                # print(round(positions[0][position],2),"\t",round(prefactor,2),"\t" , round(V_state_dhdpos[position]), "\t", round(V_R_ene[position]))
-                dhdpos_state.append(prefactor * V_state_dhdpos[position])
-                dhdpos_R += prefactor * V_state_dhdpos[position]
-                dlist = [dhdpos_R]
-                dlist.extend(dhdpos_state)
-            dhdpos.append(dlist)
-        return dhdpos
+            dhdposR_position = []
+            for dimPos in range(len(positions[0][0])):
+                dhdposR_positionDim = 0
+                for state in range(len(V_Is_ene)):
+                    dhdposR_positionDim = np.add(dhdposR_positionDim, dhdpos_state_scaled[state, position, dimPos])
+                dlist = [dhdposR_positionDim]
+                dlist.extend(dhdpos_state_scaled[:, position, dimPos])
+                dhdposR_position.append(dlist)
+            dhdpos_R.append(dhdposR_position)
+
+        return np.array(dhdpos_R)
 
 class envelopedPotentialMultiS(envelopedPotential):
     """
