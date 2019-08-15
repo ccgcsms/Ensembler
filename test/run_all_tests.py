@@ -4,12 +4,12 @@ import importlib
 
 if __name__ == "__main__":
     test_dir = os.path.dirname(__file__)
-    root_dir = test_dir+"/.."
-
-    os.chdir(root_dir)
-    sys.path.append(os.listdir(root_dir))
-    print(".\t", os.listdir(root_dir))
-    print("./test/\t", os.listdir(root_dir+"/test"))
+    root_dir_path = test_dir + "/.."
+    root_dir_name = os.path.basename(root_dir_path)
+    os.chdir(root_dir_path)
+    sys.path.append(os.listdir(root_dir_path))
+    print(".\t", os.listdir(root_dir_path))
+    print("./test/\t", os.listdir(root_dir_path + "/test"))
 
     #gather all test_files
     test_files = []
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     print("LOADING Tests")
     for test_file in modules:
         print("\tTry loading: ", test_file, "\n")
-        mod = importlib.import_module("Ensembler."+test_file, package=root_dir)
+        mod = importlib.import_module(root_dir_name+"." + test_file, package=root_dir_path)
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
 
         """
