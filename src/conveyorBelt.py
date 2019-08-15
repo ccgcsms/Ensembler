@@ -97,7 +97,7 @@ class Ensembler:
         '''
         self.caplam = caplam
         for i in range(self.num):
-            self.systems[i].updateLam(self.calc_lam(caplam, i))
+            self.systems[i].set_lambda(self.calc_lam(caplam, i))
         self.apply_mem()
         self.ene = self.calc_ene()
         return caplam
@@ -209,7 +209,7 @@ class Ensembler:
         '''
         outstr = ''
         for i in range(self.num):
-            outstr += '{:d}{:10.2f}{:10.3f}\n'.format(i, self.systems[i]._currentLam, self.systems[i].totene)
+            outstr += '{:d}{:10.2f}{:10.3f}\n'.format(i, self.systems[i]._currentLam, self.systems[i].getTotEnergy())
         return outstr
 
     def __repr__(self):

@@ -215,25 +215,22 @@ class envelopedPotential(_potentialNDCls):
 
     # each state gets a position list
     def _check_positions_type(self, positions: t.List[float]) -> np.array:
-        if (type(positions) in [float, int, str]):
-            if (len(positions) != self.numStates):
-                return np.array([positions for state in range(self.numStates + 1)], ndmin=3)
-            else:
-                return np.array([float(positions) for state in range(self.numStates + 1)], ndmin=3)
+        if (isinstance(positions, numbers.Number)):
+                return np.array([[[positions]] for state in range(self.numStates)], ndmin=3)
         elif (isinstance(positions, Iterable)):
-            if (len(positions) != self.numStates):
-                if (isinstance(positions[0], Iterable) and all([ isinstance(dimPos, numbers.Number) for pos in positions for dimPos in pos])):  # Ndimensional case
-                    return np.array([positions for state in range(self.numStates)], ndmin=3)
-                else:  # onedimensional
-                    return np.array([positions for state in range(self.numStates)], ndmin=3)
-            else:  # TODO: insert check here! for fitting numstates
+            if(all([isinstance(x, numbers.Number) for x in positions])):
+                return np.array([[positions] for state in range(self.numStates)], ndmin=3)
+            elif(all([isinstance(x, Iterable) and all([isinstance(y, numbers.Number) for y in x]) for x in positions])):
+                return np.array([positions for position in range(self.numStates)], ndmin=3)
+            elif(all([isinstance(x, Iterable) and all([isinstance(y, Iterable) and all([isinstance(z, numbers.Number) for z in y] ) for y in x]) for x in positions])):
                 return np.array(positions, ndmin=3)
+            else:
+                raise Exception("This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
         else:
             raise Exception(
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
     def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
-        print(positions.shape)
         partA = np.array([-self.s * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])])
         partB = np.array([-self.s * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])])
         sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
