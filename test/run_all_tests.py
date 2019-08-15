@@ -3,19 +3,20 @@ import unittest
 import importlib
 
 if __name__ == "__main__":
-    test_dir = os.path.dirname(__file__)
-    root_dir_path = test_dir.replace("/test","")
+    test_dir_path = os.path.dirname(__file__)
+    root_dir_path = test_dir_path.replace("/test", "")
     root_dir_name = os.path.basename(root_dir_path)
     os.chdir(root_dir_path)
     sys.path.append(root_dir_path)
 
     print(root_dir_path)
-    #print(".\t", os.listdir(root_dir_path))
-    #print("./test/\t", os.listdir(test_dir))
+    print("cwd ", os.listdir(os.getcwd()))
+    print(".\t", os.listdir(root_dir_path))
+    print("./test/\t", os.listdir(test_dir_path))
 
     #gather all test_files
     test_files = []
-    for dir in os.walk(test_dir):
+    for dir in os.walk(test_dir_path):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py"))])
     print(test_files)
 
