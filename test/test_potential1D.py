@@ -59,16 +59,15 @@ class potential1DCls(unittest.TestCase):
 
     def test_check_positions_nDlist_type(self):
         position = [[1.0, 2.0, 3.0]]
-        expected = 'list dimensionality does not fit to potential dimensionality! len(list)=1 potential Dimensions 1'
-        try:
-            checked_pos = pot._potential1DCls._check_positions_type(positions=position)
-        except Exception as err:
-            print(err.args)
-            self.assertEqual(expected, err.args[0])
-            print("Found Err")
-            return 0
-        print("Did finish without error!")
-        exit(1)
+        expected = [1.0, 2.0, 3.0]
+        checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+
+        if (not isinstance(checked_pos, Iterable)):
+            print(type(checked_pos), type(checked_pos[0]))
+            raise Exception("The return Type has to be Iterable[Float] - no list")
+        elif (any([not isinstance(pos, numbers.Number) for pos in checked_pos])):
+            print(type(checked_pos), type(checked_pos[0]))
+            raise Exception("The return Type has to be Iterable[Float] - not all list elements are float")
 
     def test_check_positions_2Dlist_type(self):
         position = [[1.0, 2.0], [3.0, 4.0]]

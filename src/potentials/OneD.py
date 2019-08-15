@@ -32,12 +32,12 @@ class _potential1DCls(ND._potentialNDCls):
         :return type: t.List[float]
         """
         print(positions)
-        if(isinstance(positions, numbers.Number)):
-            return np.array(positions, ndmin=cls.nDim)
-        elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):
-            return np.array(positions, ndmin=cls.nDim)
+        if(isinstance(positions, numbers.Number)):  #single number
+            return np.array(positions, ndmin=1)
+        elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):  #list with numbers
+            return np.array(positions, ndmin=1)
         elif (isinstance(positions, Iterable) and type(positions) != type(None) and len(positions) == 1 and all([isinstance(x, numbers.Number) for x in positions[0]])):
-            return np.array(positions, ndmin=cls.nDim)
+            return np.array(positions[0], ndmin=1)
         else:
             if(type(positions) == type(None) ):
                 raise Exception("potential got None as position")
