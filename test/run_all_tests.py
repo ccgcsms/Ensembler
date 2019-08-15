@@ -7,7 +7,8 @@ if __name__ == "__main__":
     root_dir_path = test_dir.replace("/test","")
     root_dir_name = os.path.basename(root_dir_path)
     os.chdir(root_dir_path)
-    sys.path.append(os.listdir(root_dir_path))
+    sys.path.append(root_dir_path)
+
     print(".\t", os.listdir(root_dir_path))
     print("./test/\t", os.listdir(root_dir_path + "/test"))
 
@@ -26,11 +27,11 @@ if __name__ == "__main__":
         modules.append(module_name)
 
     print("LOADING Tests")
-    modules = ["Ensembler.test.test_potential1D", "Ensembler.test.test_potentialND", "Ensembler.test.test_system"]
+    modules = ["test.test_potential1D", "test.test_potentialND", "test.test_system"]
     for test_file in modules:
         print("\tTry loading: ", root_dir_name+"." + test_file, "\n")
         mod = importlib.import_module(root_dir_name+"." + test_file)
-        suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromName(root_dir_name+"." +test_file))
 
         """
         try:
