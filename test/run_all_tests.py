@@ -1,17 +1,19 @@
 import os, sys
 import unittest
-
+import importlib
 
 if __name__ == "__main__":
-    root_dir = os.path.dirname(__file__)
-    sys.path.append(root_dir.replace("/test", ""))
-    print(root_dir.replace("/test", ""))
+    test_dir = os.path.dirname(__file__)
+    root_dir = test_dir+"/.."
+
+    os.chdir(root_dir)
+    sys.path.append(os.listdir(root_dir))
     print(".\t", os.listdir(root_dir))
-    print("..\t", os.listdir(root_dir+"/.."))
+    print("./test/\t", os.listdir(root_dir+"/test"))
 
     #gather all test_files
     test_files = []
-    for dir in os.walk(root_dir):
+    for dir in os.walk(test_dir):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py"))])
     print(test_files)
 
@@ -21,16 +23,14 @@ if __name__ == "__main__":
     print("CHECKING Tests")
     for test_file in test_files:
         module_name = test_file[test_file.index("test"):].replace("/", ".").replace(".py", "")
-        #module_name = test.replace(os.path.dirname(root_dir)+".", "").replace("/", ".").replace(".py", "")
         modules.append(module_name)
 
     print("LOADING Tests")
     for test_file in modules:
         print("\tTry loading: ", test_file, "\n")
-        print(os.getcwd())
-        print(os.listdir(os.getcwd()))
-        mod = __import__(test_file, globals(), locals())    #
+        mod = importlib.import_module("Ensembler."+test_file, package=root_dir)
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test_file))
+
         """
         try:
             # If the module defines a suite() function, call it to get the suite.

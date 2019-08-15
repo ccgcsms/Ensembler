@@ -4,7 +4,7 @@ from Ensembler.src import potentials as pot
 
 class test_Integrators(unittest.TestCase):
     def test_Monte_Carlo_Integrator(self):
-        expected_norm_dist = [1]
+        expected = [1]
 
         s = 1
         Eoffs = [0, 0]
