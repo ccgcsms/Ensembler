@@ -84,8 +84,8 @@ class monteCarloIntegrator(_integratorCls):
             current_state = system.currentState
             self.oldpos = current_state.position
             self.randomShift(system.nDim)
-            self.newPos = self.oldpos + self.posShift
-            
+            self.newPos = np.add(self.oldpos,self.posShift)
+
             #only get positions in certain range or accept if no range
             if(self._critInSpaceRange(self.newPos)):
                 break
@@ -102,12 +102,13 @@ class monteCarloIntegrator(_integratorCls):
         :rtype: float
         """
         #which sign will the shift have?
-        sign = [-1 if(np.random.randint(low=0, high=100) <50) else 1 for x in range(nDim)]
+        sign = np.array([-1 if(x <50) else 1 for x in np.random.randint(low=0, high=100,size=nDim)])
+
         #Check if there is a space restriction? - converges faster
         if(self.spaceRange!=None):
-            shift = [abs(np.random.randint(low=self.spaceRange[0]/self.resolution, high=self.spaceRange[1]/self.resolution)*self.resolution) for x in range(nDim)]
+            shift = np.multiply(np.abs(np.random.randint(low=self.spaceRange[0]/self.resolution, high=self.spaceRange[1]/self.resolution, size=nDim)), self.resolution)
         else:
-            shift = [abs(np.random.rand()) for x in range(nDim)]
+            shift = np.abs(np.random.rand(nDim))
 
         #Is the step shift in the allowed area?
         if(self.maxStepSize != None and shift > self.maxStepSize):#is there a maximal step size?
@@ -116,7 +117,6 @@ class monteCarloIntegrator(_integratorCls):
             self.posShift = np.multiply(sign, self.minStepSize)
         else:
             self.posShift = np.multiply(sign, shift)
-
         return self.posShift
 
 class metropolisMonteCarloIntegrator(monteCarloIntegrator):

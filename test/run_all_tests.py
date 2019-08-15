@@ -4,7 +4,7 @@ import importlib
 
 if __name__ == "__main__":
     test_dir = os.path.dirname(__file__)
-    root_dir_path = test_dir + "/.."
+    root_dir_path = test_dir.replace("/test","")
     root_dir_name = os.path.basename(root_dir_path)
     os.chdir(root_dir_path)
     sys.path.append(os.listdir(root_dir_path))
@@ -26,6 +26,7 @@ if __name__ == "__main__":
         modules.append(module_name)
 
     print("LOADING Tests")
+    modules = ["Ensembler.test.test_potential1D", "Ensembler.test.test_potentialND", "Ensembler.test.test_system"]
     for test_file in modules:
         print("\tTry loading: ", root_dir_name+"." + test_file, "\n")
         mod = importlib.import_module(root_dir_name+"." + test_file)
