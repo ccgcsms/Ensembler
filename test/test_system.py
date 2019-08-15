@@ -5,8 +5,6 @@ from Ensembler.src import system, integrator
 
 
 class test_System(unittest.TestCase):
-
-
     def test_system_constructor(self):
         """
         uses init_state, updateEne, randomPos, self.state
@@ -19,7 +17,9 @@ class test_System(unittest.TestCase):
         position = [0.1]
         mass = [1]
 
-        sys = system.system(potential=self.pot, integrator=self.integ)
+        sys = system.system(potential=pot, integrator=integ)
+
+        self.assertEqual(pot.nDim, sys.nDim, msg="Dimensionality was not the same for system and potential!")
 
     def test_append_state(self):
         integ = integrator.monteCarloIntegrator()

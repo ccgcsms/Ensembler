@@ -1,20 +1,62 @@
 import unittest
 import numpy as np
-from Ensembler.src import potentials as pot
+from Ensembler.src import integrator as integ
 
-class test_Integrators(unittest.TestCase):
-    def test_Monte_Carlo_Integrator(self):
-        expected = [1]
+#class test_Integrators(unittest.TestCase):
+class test_MonteCarlo_Integrator(unittest.TestCase):
 
-        s = 1
-        Eoffs = [0, 0]
-        V_is = [pot.OneD.harmonicOsc1D(x_shift=-10), pot.OneD.harmonicOsc1D(x_shift=10)]
-        eds_pot = pot.ND.envelopedPotential(V_is=V_is, s=s, Eoff_i=Eoffs)
+    def test_constructor(self):
+        integrator = integ.monteCarloIntegrator()
 
-        positions = list(range(-100,100))
-        energies = eds_pot.ene(positions)
+    def test_step(self):
+        pass
 
-        self.assert_(any([ex==ene for ex, ene in zip(expected, energies)]))
+    def test_integrate(self):
+        pass
+
+class test_MetropolisMonteCarlo_Integrator(unittest.TestCase):
+
+    def test_constructor(self):
+        integrator = integ.metropolisMonteCarloIntegrator()
+
+    def test_step(self):
+        pass
+
+    def test_integrate(self):
+        pass
+
+class test_verlocityVerletIntegrator_Integrator(unittest.TestCase):
+
+    def test_constructor(self):
+        integrator = integ.velocityVerletIntegrator()
+
+    def test_step(self):
+        pass
+
+    def test_integrate(self):
+        pass
+
+class test_positionVerletIntegrator_Integrator(unittest.TestCase):
+
+    def test_constructor(self):
+        integrator = integ.positionVerletIntegrator()
+
+    def test_step(self):
+        pass
+
+    def test_integrate(self):
+        pass
+
+class test_leapFrogIntegrator_Integrator(unittest.TestCase):
+
+    def test_constructor(self):
+        integrator = integ.leapFrogIntegrator()
+
+    def test_step(self):
+        pass
+
+    def test_integrate(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
