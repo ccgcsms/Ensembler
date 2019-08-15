@@ -292,6 +292,6 @@ class perturbedSystem(system):
 
     def set_lambda(self, lam):
         self._currentLam = lam
-        self.omega = np.sqrt((1.0 + self.potential.alpha * self._currentLam) * self.potential.fc / self.mass)
+        #self.omega = np.sqrt((1.0 + self.potential.alpha * self._currentLam) * self.potential.fc / self.mass)
         self.potential.set_lam(lam=self._currentLam)
         self.updateEne()

@@ -1,5 +1,6 @@
 import unittest
-from Ensembler.src import system, conveyorBelt as ensemble
+from Ensembler.src import system, conveyorBelt as ensemble, integrator as integ
+from Ensembler.src import potentials as potent
 
 class testEnsemble(unittest.TestCase):
     def testEnsemble(self):
@@ -10,41 +11,49 @@ class testEnsemble(unittest.TestCase):
         ens.print_systems()
 
     def testEnsembleSystem(self):
-        ens = ensemble.Ensembler(0.0, 1, system=system.system(temp=300.0,
-                                                                     fc=1.0,
-                                                                     lam=0.5,
-                                                                     alpha=10.0,
-                                                                     integrator='sd'))
+        integrator = integ.metropolisMonteCarloIntegrator()
+        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
+        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb)
+
+        sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
+        ens = ensemble.Ensembler(0.0, 1, system=sys)
+
         ens.calc_ene()
         ens.propagate()
         ens.calc_ene()
         ens.print_systems()
 
     def testEnsembleSystemShift(self):
-        ens = ensemble.Ensembler(0.0, 1, system=system.system(temp=300.0,
-                                                                     fc=1.0,
-                                                                     lam=0.5,
-                                                                     alpha=10.0,
-                                                                     integrator='sd'))
+        integrator = integ.metropolisMonteCarloIntegrator()
+        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
+        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        lam = 0.5
+        pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
+
+        sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
+        ens = ensemble.Ensembler(0.0, 1, system=sys)
         ens.calc_ene()
         ens.propagate()
         ens.calc_ene()
         ens.print_systems()
 
     def testTraj(self):
-        ens = ensemble.Ensembler(0.0, 1, system=system.system(temp=300.0,
-                                                                     fc=1.0,
-                                                                     lam=0.5,
-                                                                     alpha=10.0,
-                                                                     integrator='sd'))
-        print(ensemble.calc_traj(steps=10, ens=ens))
-        ens = ensemble.Ensembler(0.0, 8, system=system.system(temp=300.0,
-                                                                     fc=1.0,
-                                                                     lam=0.5,
-                                                                     alpha=10.0,
-                                                                     integrator='sd'))
-        Ensemble.calc_traj_file(steps=100, ens=ens)
+        integrator = integ.metropolisMonteCarloIntegrator()
+        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
+        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        lam = 0.5
+        pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
+        sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
+        ens = ensemble.Ensembler(0.0, 1, system=sys)
+
+        print(ensemble.calc_traj(steps=10, ens=ens))
+        ens = ensemble.Ensembler(0.0, 8, system=sys)
+
+        ensemble.calc_traj_file(steps=100, ens=ens)
+        import os
+        os.remove(os.getcwd()+"/traj_*.dat")
 
 if __name__ == '__main__':
     unittest.main()

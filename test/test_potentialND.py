@@ -252,16 +252,77 @@ class potentialCls_envelopedPotential(unittest.TestCase):
 
         potential = pot.envelopedPotential(V_is=[ha, hb])
 
-    def test_energies1D1Pos(self):
+    def test_check_positions_float(self):
+        ha = pot.harmonicOscND(x_shift=-5)
+        hb = pot.harmonicOscND(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = 4
+        expected = np.array([[[4]], [[4]]])
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+    def test_check_positions_1DIterable(self):
+        ha = pot.harmonicOscND(x_shift=-5)
+        hb = pot.harmonicOscND(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = np.array([[4], [2], [3]])
+        expected = np.array([[[4], [2], [3]], [[4], [2], [3]]], ndmin=3)
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+    def test_check_positions_2DIterable(self):
+        ha = pot.harmonicOscND(x_shift=-5)
+        hb = pot.harmonicOscND(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = np.array((4,1))
+        expected = np.array([[[4,1]], [[4,1]]], ndmin=3)
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+    def test_check_positionsND1Pos(self):
+        ha = pot.harmonicOscND(x_shift=-5)
+        hb = pot.harmonicOscND(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = [0, 0.5, 1, 2]
+        expected = np.array([[[0, 0.5, 1, 2]], [[0, 0.5, 1, 2]]], ndmin = 2)
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+    def test_check_positionsNDPoscorrectType(self):
+        ha = pot.harmonicOscND(x_shift=-5)
+        hb = pot.harmonicOscND(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = [[[1, 2]], [[3, 4]]]
+        expected = np.array([[[1, 2]], [[3, 4]]], ndmin=3)
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+    def test_energiesND1Pos(self):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
 
-        positions = [0, 0.5, 1, 2]
-        expected_result = np.array([0, 0.5, 1, 2], ndmin=2)
+        positions = [5, -5, 0]
+        expected_result = np.array([[0., 0., 11.80685282]], ndmin=2)
 
         potential = pot.envelopedPotential(V_is=[ha, hb])
         energies = potential.ene(positions)
 
+        print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,
@@ -271,18 +332,19 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
 
-        positions = np.linspace(-10, 10, num=5)
-        #positions = [[1,2], [3,4], [5,6]]
-        expected_result_dhRdpos = np.array([12.5, 0, 11.80685282, 0, 12.5], ndmin=2)
+        positions = [5, -5, 2, 0]
+        expected_result = np.array([[[ 0.,          0.,          0.,        ],
+                                      [ 0.,          0.,         -0.        ],
+                                      [-1.44827586,  1.0862069,  -2.53448276],
+                                      [ 0.,          2.5,        -2.5       ]]], ndmin=3)
 
         potential = pot.envelopedPotential(V_is=[ha, hb])
         energies = potential.dhdpos(positions)
 
-        self.assertEqual(type(np.array([])), type(energies),
-                         msg="returnType of potential was not correct! it should be an np.array")
         print(energies)
-        #Check the dh_rdpos
-        np.testing.assert_almost_equal(desired=expected_result_dhRdpos, actual=energies[:,:,0],
+        self.assertEqual(type(expected_result), type(energies),
+                         msg="returnType of potential was not correct! it should be an np.array")
+        np.testing.assert_almost_equal(desired=expected_result, actual=energies,
                                        err_msg="The results of " + potential.name + " are not correct!", decimal=8)
 
 
@@ -290,19 +352,21 @@ class potentialCls_envelopedPotentialMultiS(unittest.TestCase):
     def test_constructor(self):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
-
-        potential = pot.envelopedPotential(V_is=[ha, hb])
+        s = (1,1)
+        potential = pot.envelopedPotentialMultiS(V_is=[ha, hb],s=s)
 
     def test_energies1D1Pos(self):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
+        s = (1,1)
 
         positions = np.linspace(-10, 10, num=5)
         expected_result = np.array([12.5, 0, 11.80685282, 0, 12.5],ndmin=2)
 
-        potential = pot.envelopedPotential(V_is=[ha, hb])
+        potential = pot.envelopedPotential(V_is=[ha, hb], s=s)
         energies = potential.ene(positions)
 
+        print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,

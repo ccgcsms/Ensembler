@@ -68,7 +68,6 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         param_range = range(288, 310)
         replicas =len(param_range)
         expected_pos= range(replicas)
-        from Ensembler.src import ensemble
         self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=param_range)
 
         initial_positions = sorted([self.group.replicas[replica]._currentPosition for replica in self.group.replicas])
