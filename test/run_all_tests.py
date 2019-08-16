@@ -4,13 +4,15 @@ import importlib
 
 if __name__ == "__main__":
     print("RUNNING ALL TESTS\n")
+
     test_dir_path = os.path.dirname(__file__)
     test_dir_path = "/test" if(test_dir_path == "test") else test_dir_path
+    print("test_dir_path:\t", test_dir_path)
 
-    print("test_dir_path:t\t", test_dir_path)
     root_dir_path = os.path.dirname(test_dir_path)
     root_dir_path = "/" if(root_dir_path == "") else root_dir_path
-    print("root_dir_path", root_dir_path)
+    print("root_dir_path:\t", root_dir_path)
+    print("root_dir_cont: "+ os.listdir(root_dir_path))
     root_dir_name = os.path.basename(root_dir_path)
 
     os.chdir(root_dir_path)
