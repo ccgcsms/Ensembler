@@ -4,8 +4,11 @@ import importlib
 
 if __name__ == "__main__":
     test_dir_path = os.path.dirname(__file__)
+    print("test_dir_path", test_dir_path)
     root_dir_path = os.path.dirname(test_dir_path)
+    print("root_dir_path", root_dir_path)
     root_dir_name = os.path.basename(root_dir_path)
+
     os.chdir(root_dir_path)
     sys.path.append(root_dir_path)
 
@@ -29,7 +32,7 @@ if __name__ == "__main__":
         modules.append(module_name)
 
     print("LOADING Tests")
-    modules = ["test.test_potential1D", "test.test_potentialND", "test.test_system"]
+    #modules = ["test.test_potential1D", "test.test_potentialND", "test.test_system"]
     for test_file in modules:
         print("\tTry loading: ", root_dir_name+"." + test_file, "\n")
         mod = importlib.import_module(root_dir_name+"." + test_file)
