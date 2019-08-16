@@ -32,6 +32,8 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            echo "${PWD}"
+            less ./requirements.txt
             conda install --file requirements.txt
             #pip install -r requirements.txt
 
