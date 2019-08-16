@@ -6,19 +6,28 @@ Module: Potential
 """
 
 import numpy as np
+import numbers
 import math
 import typing as t
 
 from Ensembler.src.potentials import ND
 
-class potential2DCls(ND._potentialNDCls):
+class _potential2DCls(ND._potentialNDCls):
     '''
     potential base class
     '''
     nDim:int =2
 
+    @classmethod
+    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
+        positions = super()._check_positions_type(positions=positions)
 
-class wavePotential2D(potential2DCls):
+        if(all([len(pos) == cls.nDim for pos in positions])):
+            return positions
+        else:
+            raise Exception("Dimensionality is not correct for positions! "+str(positions))
+
+class wavePotential2D(_potential2DCls):
 
     '''
 
@@ -31,8 +40,9 @@ class wavePotential2D(potential2DCls):
     amplitude:float = 1.0
     multiplicity:float = 1.0
     radians:bool = False
+    y_offset:tuple = (0.0,0.0)
 
-    def __init__(self,  phase_shift:tuple=(0.0, 0.0), multiplicity:tuple=(1.0, 1.0), amplitude:tuple=(1.0, 1.0), radians:bool=False):
+    def __init__(self,  phase_shift:tuple=(0.0, 0.0), multiplicity:tuple=(1.0, 1.0), amplitude:tuple=(1.0, 1.0), y_offset:tuple=(0,0), radians:bool=False):
 
         '''
 
@@ -44,6 +54,7 @@ class wavePotential2D(potential2DCls):
         self.amplitude = amplitude
         self.multiplicity = multiplicity
         self.set_radians(radians)
+        self.y_offset = y_offset
 
         if(radians):
             self.phase_shift = phase_shift
@@ -57,21 +68,21 @@ class wavePotential2D(potential2DCls):
         self.radians=radians
 
         if(radians):
-            self._calculate_energies = lambda positions: list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind])) for ind,x in enumerate(coords)]), positions))
+            self._calculate_energies = lambda positions: np.array(list(map(lambda coords:
+                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(coords)]), positions)))
 
-            self._calculate_dhdpos =  lambda positions: list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind])) for ind,x in enumerate(coords)]), positions))
+            self._calculate_dhdpos =  lambda positions: np.array(list(map(lambda coords:
+                          sum([self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(coords)]), positions)))
 
         else:
-            self._calculate_energies = lambda positions: list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind])) for ind,x in enumerate(np.deg2rad(coords))]), positions))
+            self._calculate_energies = lambda positions: np.array(list(map(lambda coords:
+                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(np.deg2rad(coords))]), positions)))
 
-            self._calculate_dhdpos =  lambda positions: list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind])) for ind,x in enumerate(np.deg2rad(coords))]), positions))
+            self._calculate_dhdpos =  lambda positions: np.array(list(map(lambda coords:
+                          [self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(np.deg2rad(coords))], positions)))
 
 
-class torsionPotential2D(potential2DCls):
+class torsionPotential2D(_potential2DCls):
     '''
         .. autoclass:: Torsion Potential
     '''

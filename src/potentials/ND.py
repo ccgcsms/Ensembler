@@ -231,14 +231,15 @@ class envelopedPotential(_potentialNDCls):
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
     def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
-        partA = np.array([-self.s * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])])
-        partB = np.array([-self.s * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])])
-        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
+        partA = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[0])) for Vit in self.V_is[0].ene(positions[0])])
+        partB = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[1])) for Vit in self.V_is[1].ene(positions[1])])
+
+        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + np.log(1 + np.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
                           zip(partA, partB)])
 
         # more than two states!
         for state in range(2, self.numStates):
-            partN = [-self.s * (Vit - self.Eoff_i[state]) for Vit in self.V_is[state].ene(positions[state])]
+            partN = [np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])]
             sum_prefactors = np.array(
                 [list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
                  for A, B in
@@ -328,45 +329,20 @@ class envelopedPotentialMultiS(envelopedPotential):
         self.s = s
         self.Eoff_i = Eoff_i
 
-    def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
+    def _calculate_energies(self, positions: (t.List[float] or float)) -> np.array:
         partA = [-self.s[0] * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])]
         partB = [-self.s[1] * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])]
-        sum_prefactors = [max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))) for A_t, B_t in
-                          zip(partA, partB)]
+
+        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + np.log(1 + np.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
+                          zip(partA, partB)])
 
         # more than two states!
         for state in range(2, self.numStates):
-            partN = [-self.s[state] * (Vit - self.Eoff_i[state]) for Vit in self.V_is[state].ene(positions[state])]
-            sum_prefactors = [max(sum_prefactors_t, N_t) + math.log(
-                1 + math.exp(min(sum_prefactors_t, N_t) - max(sum_prefactors_t, N_t))) for sum_prefactors_t, N_t in
-                              zip(sum_prefactors, partN)]
+            partN = [np.multiply(-self.s[state], np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])]
+            sum_prefactors = np.array(
+                [list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
+                 for A, B in
+                 zip(sum_prefactors, partN)])
 
-        Vr = [- partitionF for state, partitionF in enumerate(sum_prefactors)]  # 1/ float(self.s[0]) *
-        return Vr
-
-    def _calculate_dhdpos(self, positions: (t.List[float] or float)):
-        ###CHECK!THIS FUNC!!! not correct
-        V_R_ene = self.ene(positions)
-        V_Is_ene = [statePot.ene(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
-        V_Is_dhdpos = [statePot.dhdpos(state_pos) for statePot, state_pos in zip(self.V_is, positions)]
-        dhdpos = []
-
-        for position in range(len(positions[0])):
-            dhdpos_R = 0
-            dhdpos_state = []
-            for V_state_ene, V_state_dhdpos in zip(V_Is_ene, V_Is_dhdpos):
-                # den = sum([math.exp(-const.k *Vstate[position]) for Vstate in V_Is_ene])
-                # prefactor = (math.exp(-const.k *V_state_ene[position]))/den if (den!=0) else 0
-                if (V_state_ene[position] == 0):
-                    prefactor = 0
-                else:
-                    prefactor = 1 - (V_state_ene[position] / (sum([Vstate[position] for Vstate in V_Is_ene]))) if (
-                            sum([Vstate[position] for Vstate in V_Is_ene]) != 0) else 0
-                # print(round(positions[0][position],2),"\t",round(prefactor,2),"\t" , round(V_state_dhdpos[position]), "\t", round(V_R_ene[position]))
-                dhdpos_state.append(prefactor * V_state_dhdpos[position])
-                dhdpos_R += prefactor * V_state_dhdpos[position]
-                dlist = [dhdpos_R]
-                dlist.extend(dhdpos_state)
-            dhdpos.append(dlist)
-        return dhdpos
-
+        Vr = [-1  * partitionF for partitionF in sum_prefactors]
+        return np.array(Vr)
