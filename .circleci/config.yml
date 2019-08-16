@@ -48,8 +48,6 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            echo "${PWD}"
-            echo "$(ls )"
             python test/run_all_tests.py test
 
       - store_artifacts:
