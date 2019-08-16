@@ -10,7 +10,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
 
     RE = ensemble.ReplicaExchange
     integrator = integrators.monteCarloIntegrator()
-    potential = pot.OneD.harmonicOsc1D()
+    potential = pot.OneD.harmonicOsc()
     sys = system.system(potential=potential, integrator=integrator)
     group:ensemble.ReplicaExchange = None
 
@@ -93,7 +93,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_init(self):
         integrator = integrators.monteCarloIntegrator()
-        potential =pot.OneD.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc()
         sys = system.system(potential=potential, integrator=integrator)
 
         replicas =22
@@ -104,7 +104,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_run(self):
         integrator = integrators.monteCarloIntegrator()
-        potential =pot.OneD.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc()
         sys = system.system(potential=potential, integrator=integrator)
 
         replicas =22
@@ -116,7 +116,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_exchange_all(self):
         integrator = integrators.monteCarloIntegrator()
-        potential =pot.OneD.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc()
         sys = system.system(potential=potential, integrator=integrator)
 
         T_range=range(1, 10)
@@ -146,7 +146,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
 
     def test_exchange_none(self):
         integrator = integrators.positionVerletIntegrator()
-        potential =pot.OneD.harmonicOsc1D()
+        potential =pot.OneD.harmonicOsc()
         sys = system.system(potential=potential, integrator=integrator)
 
         T_range = range(1, 500, 100)

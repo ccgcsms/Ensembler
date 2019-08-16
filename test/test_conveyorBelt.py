@@ -12,8 +12,8 @@ class testEnsemble(unittest.TestCase):
 
     def testEnsembleSystem(self):
         integrator = integ.metropolisMonteCarloIntegrator()
-        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
-        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        ha = potent.OneD.harmonicOsc(x_shift=-5)
+        hb = potent.OneD.harmonicOsc(x_shift=5)
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb)
 
         sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
@@ -26,8 +26,8 @@ class testEnsemble(unittest.TestCase):
 
     def testEnsembleSystemShift(self):
         integrator = integ.metropolisMonteCarloIntegrator()
-        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
-        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        ha = potent.OneD.harmonicOsc(x_shift=-5)
+        hb = potent.OneD.harmonicOsc(x_shift=5)
         lam = 0.5
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -40,8 +40,8 @@ class testEnsemble(unittest.TestCase):
 
     def testTraj(self):
         integrator = integ.metropolisMonteCarloIntegrator()
-        ha = potent.OneD.harmonicOsc1D(x_shift=-5)
-        hb = potent.OneD.harmonicOsc1D(x_shift=5)
+        ha = potent.OneD.harmonicOsc(x_shift=-5)
+        hb = potent.OneD.harmonicOsc(x_shift=5)
         lam = 0.5
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 

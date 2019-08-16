@@ -10,7 +10,7 @@ class test_MonteCarlo_Integrator(unittest.TestCase):
         integrator = integ.monteCarloIntegrator()
 
     def test_step(self):
-        potent = pot.OneD.harmonicOsc1D()
+        potent = pot.OneD.harmonicOsc()
         integrator = integ.monteCarloIntegrator()
         sys = system.system(potential=potent, integrator=integrator)
 
@@ -22,7 +22,7 @@ class test_MonteCarlo_Integrator(unittest.TestCase):
         pass
 
     def test_integrate(self):
-        potent = pot.OneD.harmonicOsc1D()
+        potent = pot.OneD.harmonicOsc()
         integrator = integ.monteCarloIntegrator()
         sys = system.system(potential=potent, integrator=integrator)
         steps=10

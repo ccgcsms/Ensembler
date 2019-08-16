@@ -87,7 +87,7 @@ TEST for Potentials 1D
 """
 class potentialCls_flatwell(unittest.TestCase):
     def test_constructor(self):
-        pot.flat_well1D()
+        pot.flat_well()
 
     def test_energies(self):
         x_range = [0,1]
@@ -96,7 +96,7 @@ class potentialCls_flatwell(unittest.TestCase):
         positions = [0,2,1,0.5]
         expected_result = np.array([0, 10, 0, 0])
 
-        potential = pot.flat_well1D(x_range=x_range, y_max=y_max, y_min=y_min)
+        potential = pot.flat_well(x_range=x_range, y_max=y_max, y_min=y_min)
 
         energies = potential.ene(positions)
 
@@ -109,7 +109,7 @@ class potentialCls_flatwell(unittest.TestCase):
         y_max = 10
         y_min = 0
         positions = [0,2,1,0.5]
-        potential = pot.flat_well1D(x_range=x_range, y_max=y_max, y_min=y_min)
+        potential = pot.flat_well(x_range=x_range, y_max=y_max, y_min=y_min)
         expected_result = np.array([0, 0, 0, 0])
 
         energies = potential.dhdpos(positions)
@@ -120,7 +120,7 @@ class potentialCls_flatwell(unittest.TestCase):
 
 class potentialCls_harmonicOsc1D(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.harmonicOsc1D()
+        potential = pot.harmonicOsc()
 
     def test_energies(self):
         fc= 1.0
@@ -129,7 +129,7 @@ class potentialCls_harmonicOsc1D(unittest.TestCase):
         positions = [0,2,1,0.5]
         expected_result = np.array([0, 2, 0.5, 0.125])
 
-        potential = pot.harmonicOsc1D(fc=fc, x_shift=x_shift, y_shift=y_shift)
+        potential = pot.harmonicOsc(fc=fc, x_shift=x_shift, y_shift=y_shift)
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
@@ -143,7 +143,7 @@ class potentialCls_harmonicOsc1D(unittest.TestCase):
         positions = [0,0.5, 1, 2]
         expected_result = np.array([0, 0.5, 1, 2])
 
-        potential = pot.harmonicOsc1D(fc=fc, x_shift=x_shift, y_shift=y_shift)
+        potential = pot.harmonicOsc(fc=fc, x_shift=x_shift, y_shift=y_shift)
 
         energies = potential.dhdpos(positions)
         print(energies)
@@ -153,7 +153,7 @@ class potentialCls_harmonicOsc1D(unittest.TestCase):
 
 class potentialCls_wavePotential(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.wavePotential1D()
+        potential = pot.wavePotential()
 
     def test_energies(self):
         phase_shift= 0.0
@@ -165,7 +165,7 @@ class potentialCls_wavePotential(unittest.TestCase):
         positions = [0,90, 180, 270, 360]
         expected_result = np.array([1, 0,  -1, 0, 1])
 
-        potential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        potential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
@@ -181,7 +181,7 @@ class potentialCls_wavePotential(unittest.TestCase):
         positions = [0,90, 180, 270, 360]
         expected_result = np.array([0, 1,  0, -1, 0])
 
-        potential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        potential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
         energies = potential.dhdpos(positions)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
@@ -189,13 +189,13 @@ class potentialCls_wavePotential(unittest.TestCase):
 
 class potentialCls_torsionPotential(unittest.TestCase):
     def test_constructor_SinglePotential(self):
-        WavePotential = pot.wavePotential1D()
-        potential = pot.torsionPotential1D(wave_potentials=WavePotential)
+        WavePotential = pot.wavePotential()
+        potential = pot.torsionPotential(wave_potentials=WavePotential)
 
     def test_constructor_ListPotentials(self):
-        WavePotential = pot.wavePotential1D()
-        WavePotential2 = pot.wavePotential1D()
-        potential = pot.torsionPotential1D(wave_potentials=[WavePotential, WavePotential2])
+        WavePotential = pot.wavePotential()
+        WavePotential2 = pot.wavePotential()
+        potential = pot.torsionPotential(wave_potentials=[WavePotential, WavePotential2])
 
     def test_energies_singlepot(self):
         phase_shift = 0.0
@@ -207,9 +207,9 @@ class potentialCls_torsionPotential(unittest.TestCase):
         positions = [0, 90, 180, 270, 360]
         expected_result = np.array([1, 0, -1, 0, 1])
 
-        WavePotential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude,
-                                            y_offset=y_offset, radians=radians)
-        potential = pot.torsionPotential1D(wave_potentials=WavePotential)
+        WavePotential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude,
+                                          y_offset=y_offset, radians=radians)
+        potential = pot.torsionPotential(wave_potentials=WavePotential)
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies),
@@ -227,9 +227,9 @@ class potentialCls_torsionPotential(unittest.TestCase):
         positions = [0, 90, 180, 270, 360]
         expected_result = np.array([1, 0, -1, 0, 1])
 
-        WavePotential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude,
-                                            y_offset=y_offset, radians=radians)
-        potential = pot.torsionPotential1D(wave_potentials=[WavePotential])
+        WavePotential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude,
+                                          y_offset=y_offset, radians=radians)
+        potential = pot.torsionPotential(wave_potentials=[WavePotential])
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies),
@@ -247,9 +247,9 @@ class potentialCls_torsionPotential(unittest.TestCase):
         positions = [0,90, 180, 270, 360]
         expected_result = np.array([2, 0,  -2, 0, 2])
 
-        WavePotential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
-        WavePotential2 = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
-        potential = pot.torsionPotential1D(wave_potentials=[WavePotential, WavePotential2])
+        WavePotential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        WavePotential2 = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        potential = pot.torsionPotential(wave_potentials=[WavePotential, WavePotential2])
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
@@ -267,11 +267,11 @@ class potentialCls_torsionPotential(unittest.TestCase):
         positions = [0, 90, 180, 270, 360]
         expected_result = np.array([0, 0, 0, 0, 0])
 
-        WavePotential = pot.wavePotential1D(phase_shift=phase_shift1, multiplicity=multiplicity, amplitude=amplitude,
-                                            y_offset=y_offset, radians=radians)
-        WavePotential2 = pot.wavePotential1D(phase_shift=phase_shift2, multiplicity=multiplicity, amplitude=amplitude,
-                                             y_offset=y_offset, radians=radians)
-        potential = pot.torsionPotential1D(wave_potentials=[WavePotential, WavePotential2])
+        WavePotential = pot.wavePotential(phase_shift=phase_shift1, multiplicity=multiplicity, amplitude=amplitude,
+                                          y_offset=y_offset, radians=radians)
+        WavePotential2 = pot.wavePotential(phase_shift=phase_shift2, multiplicity=multiplicity, amplitude=amplitude,
+                                           y_offset=y_offset, radians=radians)
+        potential = pot.torsionPotential(wave_potentials=[WavePotential, WavePotential2])
         energies = potential.ene(positions)
 
         self.assertEqual(type(expected_result), type(energies),
@@ -290,9 +290,9 @@ class potentialCls_torsionPotential(unittest.TestCase):
         positions = [0,90, 180, 270, 360]
         expected_result = np.array([0, 2,  0, -2, 0])
 
-        WavePotential = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
-        WavePotential2 = pot.wavePotential1D(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
-        potential = pot.torsionPotential1D(wave_potentials=[WavePotential, WavePotential2])
+        WavePotential = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        WavePotential2 = pot.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
+        potential = pot.torsionPotential(wave_potentials=[WavePotential, WavePotential2])
         energies = potential.dhdpos(positions)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
@@ -300,7 +300,7 @@ class potentialCls_torsionPotential(unittest.TestCase):
 
 class potentialCls_coulombPotential(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.coulombPotential1D()
+        potential = pot.coulombPotential()
 
     def test_energies(self):
         q1 = 1
@@ -310,7 +310,7 @@ class potentialCls_coulombPotential(unittest.TestCase):
         positions = [0, 0.2, 0.5, 1, 2, 360]
         expected_result = np.array([np.inf, 0.397887358, 0.159154943,0.0795774715, 0.0397887358, 0.000221048532])
 
-        potential = pot.coulombPotential1D(q1=q1, q2=q2, epsilon=epsilon)
+        potential = pot.coulombPotential(q1=q1, q2=q2, epsilon=epsilon)
         energies = potential.ene(positions)
 
         print(energies)
@@ -326,7 +326,7 @@ class potentialCls_coulombPotential(unittest.TestCase):
         positions = [0, 0.2, 0.5, 1, 2, 360]
         expected_result = np.array([-np.inf, -1.98943679, -0.31830988, -0.0795774715, -0.0198943679, -0.000000614023700])
 
-        potential = pot.coulombPotential1D(q1=q1, q2=q2, epsilon=epsilon)
+        potential = pot.coulombPotential(q1=q1, q2=q2, epsilon=epsilon)
         energies = potential.dhdpos(positions)
 
         print(energies)
@@ -335,7 +335,7 @@ class potentialCls_coulombPotential(unittest.TestCase):
 
 class potentialCls_lennardJonesPotential(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.lennardJonesPotential1D()
+        potential = pot.lennardJonesPotential()
 
     def test_energies(self):
         c6: float = 1**(-1)
@@ -346,7 +346,7 @@ class potentialCls_lennardJonesPotential(unittest.TestCase):
         positions = [0, 0.1, 0.2, 0.5, 1, 2, 3 ,6 ]
         expected_result = np.array([np.nan,  9.99999000*10**11, 2.44125000*10**8, 4.03200000*10**3, 0, -1.53808594*10**-2, -1.36986044*10**-3, -2.14330111*10**-5])
 
-        potential = pot.lennardJonesPotential1D(c6=c6, c12=c12, x_shift=x_shift, y_shift=y_shift)
+        potential = pot.lennardJonesPotential(c6=c6, c12=c12, x_shift=x_shift, y_shift=y_shift)
         energies = potential.ene(positions)
 
         print(energies)
@@ -363,7 +363,7 @@ class potentialCls_lennardJonesPotential(unittest.TestCase):
         positions = [0, 0.1, 0.2, 0.5, 1, 2, 3 ,6 ]
         expected_result = np.array([np.inf, 1.19999940*10**14, 1.46479687*10**10, 9.75360000*10**4, 6.00000000, -4.54101562*10**-2, -2.73595752*10**-3, -2.14325517*10**-5])
 
-        potential = pot.lennardJonesPotential1D(c6=c6, c12=c12, x_shift=x_shift, y_shift=y_shift)
+        potential = pot.lennardJonesPotential(c6=c6, c12=c12, x_shift=x_shift, y_shift=y_shift)
         energies = potential.dhdpos(positions)
 
         print(energies)
@@ -372,7 +372,7 @@ class potentialCls_lennardJonesPotential(unittest.TestCase):
 
 class potentialCls_doubleWellPot1D(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.doubleWellPot1D()
+        potential = pot.doubleWellPot()
 
     def test_energies(self):
         Vmax=100
@@ -382,7 +382,7 @@ class potentialCls_doubleWellPot1D(unittest.TestCase):
         positions = np.linspace(-10, 10, num=5)
         expected_result = np.array([31.640625, 37.13378906, 100, 37.13378906, 31.640625])
 
-        potential = pot.doubleWellPot1D(Vmax=Vmax, a=a, b=b)
+        potential = pot.doubleWellPot(Vmax=Vmax, a=a, b=b)
         energies = potential.ene(positions)
 
         print(energies)
@@ -397,7 +397,7 @@ class potentialCls_doubleWellPot1D(unittest.TestCase):
         positions = [0, 0.1, 0.2, 0.5, 1, 2, 3, 6]
         expected_result = np.array([0, -0.62490234,  -1.24921875,  -3.11279297,  -6.15234375, -11.71875, -16.11328125, -16.40625])
 
-        potential = pot.doubleWellPot1D(Vmax=Vmax, a=a, b=b)
+        potential = pot.doubleWellPot(Vmax=Vmax, a=a, b=b)
         energies = potential.dhdpos(positions)
 
         print(energies)
@@ -410,8 +410,8 @@ class potentialCls_perturbedLinCoupledHosc(unittest.TestCase):
         potential = pot.linCoupledHosc()
 
     def test_energies(self):
-        ha = pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb = pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha = pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb = pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.linCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)
@@ -451,8 +451,8 @@ class potentialCls_perturbedLinCoupledHosc(unittest.TestCase):
 
 
     def test_dHdpos(self):
-        ha=pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb=pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha=pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb=pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.linCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)
@@ -487,8 +487,8 @@ class potentialCls_perturbedLinCoupledHosc(unittest.TestCase):
 
 
     def test_dHdlam(self):
-        ha = pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb = pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha = pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb = pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.linCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)
@@ -510,8 +510,8 @@ class potentialCls_perturbedExpCoupledHosc(unittest.TestCase):
         potential = pot.expCoupledHosc()
 
     def test_energies(self):
-        ha = pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb = pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha = pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb = pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.expCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)
@@ -551,8 +551,8 @@ class potentialCls_perturbedExpCoupledHosc(unittest.TestCase):
 
 
     def test_dHdpos(self):
-        ha=pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb=pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha=pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb=pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.expCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)
@@ -587,8 +587,8 @@ class potentialCls_perturbedExpCoupledHosc(unittest.TestCase):
 
 
     def test_dHdlam(self):
-        ha = pot.harmonicOsc1D(fc=1.0, x_shift=-5.0)
-        hb = pot.harmonicOsc1D(fc=1.0, x_shift=5.0)
+        ha = pot.harmonicOsc(fc=1.0, x_shift=-5.0)
+        hb = pot.harmonicOsc(fc=1.0, x_shift=5.0)
         potential = pot.expCoupledHosc(ha=ha, hb=hb, lam=0)
 
         positions = np.linspace(-10, 10, num=5)

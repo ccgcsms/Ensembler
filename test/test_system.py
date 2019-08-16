@@ -15,7 +15,7 @@ class test_System(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -47,7 +47,7 @@ class test_System(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -78,7 +78,7 @@ class test_System(unittest.TestCase):
 
     def test_revertStep(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -121,7 +121,7 @@ class test_System(unittest.TestCase):
 
     def test_propergate(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -145,7 +145,7 @@ class test_System(unittest.TestCase):
 
     def test_simulate(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -194,7 +194,7 @@ class test_System(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -224,7 +224,7 @@ class test_System(unittest.TestCase):
 
     def test_updateEne(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -253,7 +253,7 @@ class test_System(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [1]
@@ -271,7 +271,7 @@ class test_System(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [1]
@@ -291,7 +291,7 @@ class test_System(unittest.TestCase):
 
     def test_setTemperature(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         temperature2 = 600
@@ -320,7 +320,7 @@ class test_System(unittest.TestCase):
 
     def test_get_Pot(self):
         integ = integrator.monteCarloIntegrator()
-        pot = potential1D.harmonicOsc1D()
+        pot = potential1D.harmonicOsc()
         conditions = []
         temperature = 300
         position = [0.1]
@@ -340,8 +340,8 @@ class test_perturbedSystem(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam=0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=1.0)
         conditions = []
@@ -374,8 +374,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_append_state(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -421,8 +421,8 @@ class test_perturbedSystem(unittest.TestCase):
         newLam2 = 0.5
 
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb)
         conditions = []
@@ -463,8 +463,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_propergate(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -487,8 +487,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_simulate(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
         steps=100
@@ -546,8 +546,8 @@ class test_perturbedSystem(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -570,8 +570,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_updateEne(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -597,8 +597,8 @@ class test_perturbedSystem(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
@@ -614,8 +614,8 @@ class test_perturbedSystem(unittest.TestCase):
         :return:
         """
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb)
 
@@ -634,8 +634,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_setTemperature(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb)
 
@@ -665,8 +665,8 @@ class test_perturbedSystem(unittest.TestCase):
 
     def test_get_Pot(self):
         integ = integrator.monteCarloIntegrator()
-        ha = potential1D.harmonicOsc1D(x_shift=-5)
-        hb = potential1D.harmonicOsc1D(x_shift=5)
+        ha = potential1D.harmonicOsc(x_shift=-5)
+        hb = potential1D.harmonicOsc(x_shift=5)
         lam = 0
         pot = potentials.OneD.linCoupledHosc(ha=ha, hb=hb)
 
