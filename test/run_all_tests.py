@@ -35,7 +35,7 @@ if __name__ == "__main__":
     modules = []
     print("CHECKING Tests")
     for test_file in test_files:
-        module_name = test_file[test_file.index("test"):].replace("/", ".").replace(".py", "")
+        module_name = test_file[test_file.index("/test/"):].replace("/", ".").replace(".py", "")
         modules.append(module_name)
 
     print("LOADING Tests")
