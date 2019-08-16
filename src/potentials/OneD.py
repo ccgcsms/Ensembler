@@ -71,7 +71,7 @@ class _potential1DCls(ND._potentialNDCls):
     SIMPLE POTENTIALS
 """
 
-class flat_well1D(_potential1DCls):
+class flat_well(_potential1DCls):
     '''
         .. autoclass:: flat well potential
     '''
@@ -98,7 +98,7 @@ class flat_well1D(_potential1DCls):
     def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.zeros(len(positions))
 
-class harmonicOsc1D(_potential1DCls):
+class harmonicOsc(_potential1DCls):
     '''
         .. autoclass:: harmonic oscillator potential
     '''
@@ -112,7 +112,7 @@ class harmonicOsc1D(_potential1DCls):
         :param fc: force constant
         :param x_shift: minimum position of harmonic oscillator
         '''
-        super(harmonicOsc1D, self).__init__()
+        super(harmonicOsc, self).__init__()
         self.fc = fc
         self.x_shift = x_shift
         self.y_shift = y_shift
@@ -123,7 +123,7 @@ class harmonicOsc1D(_potential1DCls):
     def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
         return np.array(list(map(lambda pos: self.fc * (pos - self.x_shift), positions)))
 
-class wavePotential1D(_potential1DCls):
+class wavePotential(_potential1DCls):
     '''
         .. autoclass:: Wave Potential
     '''
@@ -168,16 +168,16 @@ class wavePotential1D(_potential1DCls):
                 map(lambda x: self.amplitude * math.sin(self.multiplicity * (x + self.phase_shift)) + self.y_offset,
                     np.deg2rad(positions))))
 
-class torsionPotential1D(_potential1DCls):
+class torsionPotential(_potential1DCls):
     '''
         .. autoclass:: Torsion Potential
     '''
     name:str = "Torsion Potential"
 
     phase:float = 1.0
-    wave_potentials:t.Iterable[wavePotential1D] = []
+    wave_potentials:t.Iterable[wavePotential] = []
 
-    def __init__(self, wave_potentials: t.Union[t.Iterable[wavePotential1D], wavePotential1D]):
+    def __init__(self, wave_potentials: t.Union[t.Iterable[wavePotential], wavePotential]):
         '''
         initializes torsions Potential
         '''
@@ -192,14 +192,14 @@ class torsionPotential1D(_potential1DCls):
             self.wave_potentials = wave_potentials[0]
             self._calculate_energies = lambda positions: self.wave_potentials.ene(positions)
             self._calculate_dhdpos = lambda positions: self.wave_potentials.dhdpos(positions)
-        elif(isinstance(wave_potentials, wavePotential1D)):
+        elif(isinstance(wave_potentials, wavePotential)):
             self.wave_potentials = wave_potentials
             self._calculate_energies = lambda positions: self.wave_potentials.ene(positions)
             self._calculate_dhdpos = lambda positions: self.wave_potentials.dhdpos(positions)
         else:
             raise IOError("the provided potential was not recognizable.")
 
-class coulombPotential1D(_potential1DCls):
+class coulombPotential(_potential1DCls):
     name = "Coulomb Potential"
 
     epsilon:float
@@ -221,7 +221,7 @@ class coulombPotential1D(_potential1DCls):
         dcoulombLaw_currydr= lambda x: self.dcoulombLawdr(self.q1, self.q2, x, self.epsilon)
         return np.array(list(map(dcoulombLaw_currydr, distances)))
 
-class lennardJonesPotential1D(_potential1DCls):
+class lennardJonesPotential(_potential1DCls):
     '''
         .. autoclass:: Lennard Jones Potential
     '''
@@ -249,7 +249,7 @@ class lennardJonesPotential1D(_potential1DCls):
         return np.array([6 * ((2 * self.c12) - (pos ** 6 * self.c6)) / pos ** 13 for pos in positions])
 
 
-class doubleWellPot1D(_potential1DCls):
+class doubleWellPot(_potential1DCls):
     '''
         .. autoclass:: unperturbed double well potential
     '''
@@ -344,7 +344,7 @@ class _perturbedPotential1DCls(_potential1DCls):
 
 
 class linCoupledHosc(_perturbedPotential1DCls):
-    def __init__(self, ha=harmonicOsc1D(fc=1.0, x_shift=0.0), hb=harmonicOsc1D(fc=11.0, x_shift=0.0), lam=0):
+    def __init__(self, ha=harmonicOsc(fc=1.0, x_shift=0.0), hb=harmonicOsc(fc=11.0, x_shift=0.0), lam=0):
         super(_perturbedPotential1DCls).__init__()
 
         self.ha = ha
@@ -363,7 +363,7 @@ class linCoupledHosc(_perturbedPotential1DCls):
 
 
 class expCoupledHosc(_perturbedPotential1DCls):
-    def __init__(self, ha=harmonicOsc1D(fc=1.0, x_shift=0.0), hb=harmonicOsc1D(fc=11.0, x_shift=0.0), s=1.0, temp=300.0,
+    def __init__(self, ha=harmonicOsc(fc=1.0, x_shift=0.0), hb=harmonicOsc(fc=11.0, x_shift=0.0), s=1.0, temp=300.0,
                  lam: float = 0.0):
         super(_perturbedPotential1DCls).__init__()
 
@@ -394,7 +394,7 @@ class expCoupledHosc(_perturbedPotential1DCls):
         return np.array(list(map(self.couple_H_dhdlam, self.ha.ene(positions), self.hb.ene(positions))))
 
 
-class pertHarmonicOsc1D(_perturbedPotential1DCls):
+class pertHarmonicOsc(_perturbedPotential1DCls):
     """
         .. autoclass:: pertHarmonixsOsc1D
     """
@@ -426,7 +426,7 @@ class pertHarmonicOsc1D(_perturbedPotential1DCls):
                 positions])
 
 
-class envelopedDoubleWellPotential1D(ND.envelopedPotential):
+class envelopedDoubleWellPotential(ND.envelopedPotential):
     def __init__(self, y_shifts: list = None, x_shifts=None,
                  smoothing: float = 1, fcs=None):
         if (y_shifts == None):
@@ -436,7 +436,7 @@ class envelopedDoubleWellPotential1D(ND.envelopedPotential):
         if (fcs == None):
             fcs = [1, 1]
 
-        V_is = [harmonicOsc1D(x_shift=x_shift, y_shift=y_shift, fc=fc)
+        V_is = [harmonicOsc(x_shift=x_shift, y_shift=y_shift, fc=fc)
                 for y_shift, x_shift, fc in zip(y_shifts, x_shifts, fcs)]
         super().__init__(V_is=V_is, s=smoothing)
 
