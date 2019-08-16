@@ -8,11 +8,10 @@ if __name__ == "__main__":
     print("current_dir: ", os.listdir(os.getcwd()))
     
     test_dir_path = os.path.dirname(__file__)
-    test_dir_path = os.getcwd() if(test_dir_path == "test") else test_dir_path
+    test_dir_path = os.getcwd()+"/test" if(test_dir_path == "test") else test_dir_path
     print("test_dir_path:\t", test_dir_path)
 
     root_dir_path = os.path.dirname(test_dir_path)
-    root_dir_path = "/" if(root_dir_path == "") else root_dir_path
     print("root_dir_path:\t", root_dir_path)
     print("root_dir_cont: ", os.listdir(root_dir_path))
     root_dir_name = os.path.basename(root_dir_path)
