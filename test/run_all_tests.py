@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print("root_dir_cont: ", os.listdir(root_dir_path))
 
     os.chdir(root_dir_path)
-    sys.path.append(root_dir_path)
+    sys.path.append(os.path.dirname(root_dir_path))
 
     print(root_dir_path)
     print("cwd ", os.listdir(os.getcwd()))
