@@ -102,15 +102,15 @@ def animation_EDS_trajectory(sys: system, x_range=None, title:str=None, out_path
     # plotting
     x1data = [state.position for state in sys.trajectory]
     y1data = [state.totPotEnergy for state in sys.trajectory]
-    shift = [state.dhdpos for state in sys.trajectory]
+    #shift = [state.dhdpos for state in sys.trajectory]
     x_max = max(x1data)
     x_min = min(x1data)
     active_dots = 20
 
     if (x_range == None):
-        xtot_space = np.arange(x_min + 0.2 * x_min, x_max + 0.2 * x_max + 1)
+        xtot_space = np.array(np.arange(x_min + 0.2 * x_min, x_max + 0.2 * x_max + 1), ndmin=2)
     else:
-        xtot_space = np.linspace(min(x_range), max(x_range) + 1, tot_pot_resolution)
+        xtot_space = np.array(np.linspace(min(x_range), max(x_range) + 1, tot_pot_resolution), ndmin=2)
 
     tmax = len(y1data) - 1-step_size
     t0 = 0

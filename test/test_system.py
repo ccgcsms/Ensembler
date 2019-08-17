@@ -333,6 +333,18 @@ class test_System(unittest.TestCase):
         sys = system.system(potential=pot, integrator=integ, position=position, temperature=temperature)
         self.assertEqual(0.005000000000000001, sys.getPot()[0], msg="Could not get the correct Pot Energy!")
 
+    def test_get_Trajectory(self):
+        integ = integrator.monteCarloIntegrator()
+        pot = potential1D.harmonicOsc()
+        conditions = []
+        temperature = 300
+        position = [0.1]
+        mass = [1]
+
+        sys = system.system(potential=pot, integrator=integ, position=position, temperature=temperature)
+        sys.simulate(steps=10)
+        traj_pd = sys.getTrajectory()
+
 class test_perturbedSystem(unittest.TestCase):
     def test_system_constructor(self):
         """

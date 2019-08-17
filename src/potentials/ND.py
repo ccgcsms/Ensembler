@@ -34,8 +34,10 @@ class _potentialNDCls:
         """
 
         #array
-        if(isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions])
-            or isinstance(positions, Iterable) and (len(positions) == cls.nDim  or cls.nDim == 0) and all([isinstance(x, numbers.Number) for x in positions])
+        if((isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0)
+            and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions]))
+            or (isinstance(positions, Iterable) and all([isinstance(coord, Iterable) and (len(coord) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in coord]) for coord in positions]))
+            or isinstance(positions, Iterable) and (len(positions) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in positions])
             or isinstance(positions, numbers.Number)):
             return np.array(positions, ndmin=2)
         else:
@@ -209,6 +211,12 @@ class envelopedPotential(_potentialNDCls):
             raise Exception("Not all endstates have the same dimensionality! This is not imnplemented.\n Dims: " + str(
                 [V.nDim != self.nDim for V in V_is]))
 
+        #choose
+        if(self.nDim == 1):
+            self._calculate_energies = self._calculate_energies1D
+        else:
+            self._calculate_energies = self._calculate_energiesND
+
         self.V_is = V_is
         self.s = s
         self.Eoff_i = Eoff_i
@@ -218,9 +226,11 @@ class envelopedPotential(_potentialNDCls):
         if (isinstance(positions, numbers.Number)):
                 return np.array([[[positions]] for state in range(self.numStates)], ndmin=3)
         elif (isinstance(positions, Iterable)):
-            if(all([isinstance(x, numbers.Number) for x in positions])):
+            if(all([isinstance(x, numbers.Number) for x in positions]) and all([state.nDim ==1 for state in self.V_is])):   #one Dim post list
+                return np.array([positions for state in self.V_is], ndmin=2)
+            if(all([isinstance(x, numbers.Number) for x in positions])):    #ndim pot list
                 return np.array([[positions] for state in range(self.numStates)], ndmin=3)
-            elif(all([isinstance(x, Iterable) and all([isinstance(y, numbers.Number) for y in x]) for x in positions])):
+            elif(all([isinstance(x, Iterable) and all([isinstance(y, numbers.Number) for y in x]) for x in positions])):    #nDim pos lis
                 return np.array([positions for position in range(self.numStates)], ndmin=3)
             elif(all([isinstance(x, Iterable) and all([isinstance(y, Iterable) and all([isinstance(z, numbers.Number) for z in y] ) for y in x]) for x in positions])):
                 return np.array(positions, ndmin=3)
@@ -230,22 +240,46 @@ class envelopedPotential(_potentialNDCls):
             raise Exception(
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
-    def _calculate_energies(self, positions: (t.List[float] or float)) -> list:
-        partA = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[0])) for Vit in self.V_is[0].ene(positions[0])])
-        partB = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[1])) for Vit in self.V_is[1].ene(positions[1])])
+    def _calculate_energies1D(self, positions: (t.List[float] or float)) -> list:
+        #print(positions)
+        partA = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[0])) for Vit in self.V_is[0].ene(positions[0])], ndmin=1)
+        partB = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[1])) for Vit in self.V_is[1].ene(positions[1])], ndmin=1)
+        #print("partA", partA)
+        #print("partB", partB)
 
-        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + np.log(1 + np.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
-                          zip(partA, partB)])
+        sum_prefactors = np.array(list(map(lambda A_t, B_t: np.add(np.max([A_t, B_t]), np.log(np.add(1, np.exp(np.subtract(np.min([A_t, B_t]), np.max([A_t, B_t])))))), partA, partB)))
 
         # more than two states!
         for state in range(2, self.numStates):
-            partN = [np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])]
+            partN = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])], ndmin=1)
+
+            sum_prefactors = np.array(list(map(lambda A_t, B_t: np.add(np.max([A_t, B_t]), np.log(np.add(1, np.exp(np.subtract(np.min([A_t, B_t]), np.max([A_t, B_t])))))), sum_prefactors, partN)))
+
+        #print(sum_prefactors)
+        Vr = np.multiply(np.divide(-1, float(self.s)), sum_prefactors)
+        return np.array(Vr)
+
+    def _calculate_energiesND(self, positions: (t.List[float] or float)) -> list:
+        #print("ND")
+        #print(positions)
+        partA = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[0])) for Vit in self.V_is[0].ene(positions[0])], ndmin=2)
+        partB = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[1])) for Vit in self.V_is[1].ene(positions[1])], ndmin=2)
+        #print("partA", partA)
+        #print("partB", partB)
+
+        sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + np.log(1 + np.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
+                         zip(partA, partB)])
+
+        # more than two states!
+        for state in range(2, self.numStates):
+            partN = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])], ndmin=2)
+
             sum_prefactors = np.array(
                 [list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
-                 for A, B in
-                 zip(sum_prefactors, partN)])
+                 for A, B in zip(sum_prefactors, partN)])
 
-        Vr = [-1 / float(self.s) * partitionF for partitionF in sum_prefactors]
+        #print(sum_prefactors)
+        Vr = np.multiply(np.divide(-1, float(self.s)), sum_prefactors)
         return np.array(Vr)
 
     def _calculate_dhdpos(self, positions: (t.List[float] or float)):
@@ -332,7 +366,7 @@ class envelopedPotentialMultiS(envelopedPotential):
     def _calculate_energies(self, positions: (t.List[float] or float)) -> np.array:
         partA = [-self.s[0] * (Vit - self.Eoff_i[0]) for Vit in self.V_is[0].ene(positions[0])]
         partB = [-self.s[1] * (Vit - self.Eoff_i[1]) for Vit in self.V_is[1].ene(positions[1])]
-
+        #print(partA,partB)
         sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + np.log(1 + np.exp(min(A_t, B_t) - max(A_t, B_t))), A, B)) for A, B in
                           zip(partA, partB)])
 

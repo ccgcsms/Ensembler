@@ -12,6 +12,8 @@ from collections.abc import Iterable
 
 from Ensembler.src.potentials import ND
 
+from Ensembler.src.potentials.ND import envelopedPotential  #for user convenience, so these potentials are also usable from here.
+
 class _potential1DCls(ND._potentialNDCls):
     '''
         .. autoclass:: _potentialCls
@@ -20,7 +22,6 @@ class _potential1DCls(ND._potentialNDCls):
     '''
 
     nDim:int = 1
-
     @classmethod
     def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
         """
@@ -35,8 +36,11 @@ class _potential1DCls(ND._potentialNDCls):
             return np.array(positions, ndmin=1)
         elif (isinstance(positions, Iterable) and all([isinstance(x, numbers.Number) for x in positions])):  #list with numbers
             return np.array(positions, ndmin=1)
-        elif (isinstance(positions, Iterable) and type(positions) != type(None) and len(positions) == 1 and all([isinstance(x, numbers.Number) for x in positions[0]])):
+        elif (isinstance(positions, Iterable) and all([isinstance(x, Iterable) and len(x) ==1 and all([isinstance(pos, numbers.Number) for pos in x]) for x in positions])):
+            return np.array(positions, ndmin=1)
+        elif (isinstance(positions, Iterable) and (type(positions) != type(None) and len(positions)==1) and all([isinstance(pos, numbers.Number) for pos in positions[0]])):
             return np.array(positions[0], ndmin=1)
+
         else:
             if(type(positions) == type(None) ):
                 raise Exception("potential got None as position")
