@@ -349,7 +349,7 @@ def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotentia
     min_e = 0
 
     for x in positions:
-        row = eds_potential.ene([[x for i in positions], positions])
+        row = eds_potential.ene([[[x for i in positions]], [positions]])
         row_cut = list(map(lambda x:  V_max if(V_max != None and x > V_max) else x, row))
         energy_map.append(row_cut)
         if(min(row)< min_e):
@@ -388,6 +388,49 @@ def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotentia
     if(title):    fig.suptitle(title)
     if(out_path): fig.savefig(out_path)
     fig.show()
+    return fig, axes
+
+
+def envPot_diffS_2stateMap_compare(eds_potential: pot.envelopedPotential, s_values: list, positions: list,
+                                   V_max: float = 500, V_min: float = None, title: str = None, out_path: str = None):
+    ##row/column ratio
+    per_row = 4
+    n_rows = (len(s_values) // per_row) + 1 if ((len(s_values) % per_row) > 0) else (len(s_values) // per_row)
+
+    ##plot
+    fig, axes = plt.subplots(nrows=n_rows, ncols=per_row, figsize=(20, 10))
+    axes = [ax for ax_row in axes for ax in ax_row]
+    first = True
+
+    for ax, s in zip(axes, s_values):
+        eds_potential.s = s
+        min_e = 0
+        energy_map = []
+        for x in positions:
+            row = eds_potential.ene([[[x for i in positions]], [positions]])
+            row_cut = list(map(lambda x: V_max if (V_max != None and x > V_max) else x, row))
+            energy_map.append(row_cut)
+            if (min(row) < min_e):
+                min_e = min(row)
+        if (V_min == None and first):
+            V_min = min_e
+            first = False
+            print("emin: ", min_e)
+
+        # plot phase space surface
+        surf = ax.imshow(energy_map, cmap="viridis", interpolation="nearest",
+                         origin='center', extent=[min(positions), max(positions), min(positions), max(positions)],
+                         vmax=V_max, vmin=V_min)
+        ax.set_xlabel("$r_1$")
+        ax.set_ylabel("$r_2$")
+        ax.set_title("complete phaseSpace of $state_R$")
+    fig.colorbar(surf, aspect=10, label='Energy/kJ')
+
+    ##optionals
+    if (title):    fig.suptitle(title)
+    if (out_path): fig.savefig(out_path)
+    fig.show()
+
     return fig, axes
 
 if __name__ == "__main__":

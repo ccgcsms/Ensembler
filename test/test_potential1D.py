@@ -607,14 +607,14 @@ class potentialCls_perturbedExpCoupledHosc(unittest.TestCase):
 
 class potentialCls_perturbedHarmonicOsc1D(unittest.TestCase):
     def test_constructor(self):
-        potential = pot.pertHarmonicOsc1D()
+        potential = pot.pertHarmonicOsc()
 
     def test_energies(self):
         fc = 1.0
         alpha = 1.0
         gamma = 0.0
         lam = 0
-        potential = pot.pertHarmonicOsc1D(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
+        potential = pot.pertHarmonicOsc(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
 
         positions = np.linspace(-10, 10, num=5)
 
@@ -657,7 +657,7 @@ class potentialCls_perturbedHarmonicOsc1D(unittest.TestCase):
         alpha = 1.0
         gamma = 0.0
         lam = 0
-        potential = pot.pertHarmonicOsc1D(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
+        potential = pot.pertHarmonicOsc(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
         positions = np.linspace(-10, 10, num=5)
 
         #energies only for pot HA
@@ -694,7 +694,7 @@ class potentialCls_perturbedHarmonicOsc1D(unittest.TestCase):
         alpha = 1.0
         gamma = 0.0
         lam = 0
-        potential = pot.pertHarmonicOsc1D(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
+        potential = pot.pertHarmonicOsc(fc=fc, alpha=alpha, gamma=gamma, lam=lam)
 
         positions = np.linspace(-10, 10, num=5)
 

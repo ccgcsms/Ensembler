@@ -6,6 +6,7 @@ Module: System
 import numpy as np
 from typing import Iterable
 from numbers import Number
+import pandas as pd
 import scipy.constants as const
 
 from Ensembler.src import dataStructure as data
@@ -103,7 +104,6 @@ class system:
         return
 
     def simulate(self, steps:int, initSystem:bool=True, withdrawTraj:bool=False, save_every_state:int=1):
-        
         if(steps > 1000):
             show_progress =True
             block_length = steps*0.1
@@ -188,8 +188,11 @@ class system:
     def getCurrentState(self)->state:
         return self.currentState
     
-    def getTrajectory(self)->Iterable[state]:
+    def getTrajectoryObjects(self)->Iterable[state]:
         return self.trajectory
+
+    def getTrajectory(self)->pd.DataFrame:
+        return pd.DataFrame.from_dict([frame._asdict() for frame  in self.trajectory])
 
     def set_current_state(self, currentPosition:(Number or Iterable), currentVelocities:(Number or Iterable)=0, currentForce:(Number or Iterable)=0, currentTemperature:Number=298):
         self._currentPosition = currentPosition

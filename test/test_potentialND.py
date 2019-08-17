@@ -6,6 +6,7 @@ from collections.abc import Iterable
 sys.path.append(os.path.dirname(__file__+"/../.."))
 
 from Ensembler.src.potentials import ND as pot
+from Ensembler.src.potentials import OneD as pot1
 
 """
 TEST for Potentials ND
@@ -300,6 +301,23 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
+    def test_check_positions1DNPos(self):
+        ha = pot1.harmonicOsc(x_shift=-5)
+        hb = pot1.harmonicOsc(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = [0, 0.5, 1, 2]
+        expected = np.array([[0, 0.5, 1, 2], [0, 0.5, 1, 2]], ndmin = 2)
+        checked = potential._check_positions_type(positions=positions)
+
+        print(checked)
+        np.testing.assert_equal(checked, expected, "not the same sorry.")
+
+        expected_enes
+        energies = potential.ene(positions)
+        print("ENE> ", energies)
+
+
     def test_check_positionsNDPoscorrectType(self):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
@@ -316,17 +334,28 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         ha = pot.harmonicOscND(x_shift=-5)
         hb = pot.harmonicOscND(x_shift=5)
 
-        positions = [5, -5, 0]
+        position = [5, -5, 0]
         expected_result = np.array([[0., 0., 11.80685282]], ndmin=2)
 
         potential = pot.envelopedPotential(V_is=[ha, hb])
-        energies = potential.ene(positions)
+        energies = potential.ene(position)
 
         print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,
                                        err_msg="The results of " + potential.name + " are not correct!", decimal=8)
+
+    def test_check_positions1DNPos(self):
+        ha = pot1.harmonicOsc(x_shift=-5)
+        hb = pot1.harmonicOsc(x_shift=5)
+        potential = pot.envelopedPotential(V_is=[ha, hb])
+
+        positions = [0, 0.5, 1, 2]
+        expected = np.array([11.80685282, 10.11828465, 7.9999546, 4.5])
+        energies = potential.ene(positions)
+
+        np.testing.assert_almost_equal(energies, expected, err_msg="not the same sorry.", decimal=5)
 
     def test_dhdpos1D(self):
         ha = pot.harmonicOscND(x_shift=-5)
