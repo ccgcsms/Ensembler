@@ -214,20 +214,20 @@ class envelopedPotential(_potentialNDCls):
         #choose
         if(self.nDim == 1):
             self._calculate_energies = self._calculate_energies1D
+            self._check_positions_type = self._check_positions_type1D
         else:
             self._calculate_energies = self._calculate_energiesND
+            self._check_positions_type = self._check_positions_typeND
 
         self.V_is = V_is
         self.s = s
         self.Eoff_i = Eoff_i
 
     # each state gets a position list
-    def _check_positions_type(self, positions: t.List[float]) -> np.array:
+    def _check_positions_typeND(self, positions: t.List[float]) -> np.array:
         if (isinstance(positions, numbers.Number)):
                 return np.array([[[positions]] for state in range(self.numStates)], ndmin=3)
         elif (isinstance(positions, Iterable)):
-            if(all([isinstance(x, numbers.Number) for x in positions]) and all([state.nDim ==1 for state in self.V_is])):   #one Dim post list
-                return np.array([positions for state in self.V_is], ndmin=2)
             if(all([isinstance(x, numbers.Number) for x in positions])):    #ndim pot list
                 return np.array([[positions] for state in range(self.numStates)], ndmin=3)
             elif(all([isinstance(x, Iterable) and all([isinstance(y, numbers.Number) for y in x]) for x in positions])):    #nDim pos lis
@@ -240,6 +240,17 @@ class envelopedPotential(_potentialNDCls):
             raise Exception(
                 "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
+    def _check_positions_type1D(self, positions: (numbers.Number or t.Iterable[float] or t.Iterable[t.Iterable[float]])) -> np.array:
+        if (isinstance(positions, numbers.Number)):
+            return np.array([positions for state in range(self.numStates)], ndmin=1)
+        elif(isinstance(positions, Iterable) and all([isinstance(pos, numbers.Number) for pos in positions])):
+            return np.array([positions for state in range(self.numStates)], ndmin=2)
+        elif (isinstance(positions, Iterable) and len(positons) == len(self.V_is) and all([isinstance(pos, Iterable) for pos in positions])):
+            return np.array([positions for state in range(self.numStates)], ndmin=2)
+        else:
+            raise Exception(
+                "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
+
     def _calculate_energies1D(self, positions: (t.List[float] or float)) -> list:
         #print(positions)
         partA = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[0])) for Vit in self.V_is[0].ene(positions[0])], ndmin=1)
@@ -247,12 +258,11 @@ class envelopedPotential(_potentialNDCls):
         #print("partA", partA)
         #print("partB", partB)
 
-        sum_prefactors = np.array(list(map(lambda A_t, B_t: np.add(np.max([A_t, B_t]), np.log(np.add(1, np.exp(np.subtract(np.min([A_t, B_t]), np.max([A_t, B_t])))))), partA, partB)))
+        sum_prefactors = np.array(list(map(lambda A_t, B_t: np.add(max(A_t, B_t), np.log(np.add(1, np.exp(np.subtract(min(A_t, B_t), max(A_t, B_t)))))), partA, partB)))
 
         # more than two states!
         for state in range(2, self.numStates):
             partN = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])], ndmin=1)
-
             sum_prefactors = np.array(list(map(lambda A_t, B_t: np.add(np.max([A_t, B_t]), np.log(np.add(1, np.exp(np.subtract(np.min([A_t, B_t]), np.max([A_t, B_t])))))), sum_prefactors, partN)))
 
         #print(sum_prefactors)
@@ -273,9 +283,7 @@ class envelopedPotential(_potentialNDCls):
         # more than two states!
         for state in range(2, self.numStates):
             partN = np.array([np.multiply(-self.s, np.subtract(Vit, self.Eoff_i[state]))for Vit in self.V_is[state].ene(positions[state])], ndmin=2)
-
-            sum_prefactors = np.array(
-                [list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
+            sum_prefactors = np.array([list(map(lambda A_t, B_t: max(A_t, B_t) + math.log(1 + math.exp(min(A_t, B_t) - max(A_t, B_t))), A, B))
                  for A, B in zip(sum_prefactors, partN)])
 
         #print(sum_prefactors)
