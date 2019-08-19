@@ -59,6 +59,20 @@ class system:
         self.mass = mass
         self.nDim = potential.nDim
 
+        #is the potential a state dependent one? - needed for initial pos.
+        if(hasattr(potential, "nStates")):
+            self.nStates = potential.nStates
+            if(hasattr(potential, "states_coupled")):   #does each state get the same position?
+                self.states_coupled = potential.states_coupled
+            else:
+                self.states_coupled = True #Todo: is this a good Idea?
+        else:
+            self.nstates = 1
+
+        #Settings for potential
+        potential._set_no_type_check()  #initially taken care by system. Saves performance!
+        potential.set_singlePos_mode()  #easier execution... does apparently not save so much performacne
+
         #check if system is coupled to conditions:
         for condition in self.conditions:
             if(not hasattr(condition, "system")):
@@ -71,7 +85,6 @@ class system:
         #define dims of system. #Todo: only true for one dim Pot.
         self.init_state(initial_position=position)
 
-
     def init_state(self, initial_position=None):
         #initial position given?
         if (initial_position == None):
@@ -79,11 +92,19 @@ class system:
         else:
             self.initial_positions = initial_position
 
+        self._currentForce = self.potential.dhdpos(self.initial_positions)  #initialise forces!
+
         #set a new current_state
         self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature)
 
     def randomPos(self)-> Iterable:
-        return np.subtract(np.multiply(np.random.rand(self.nDim),20),10)
+        if(self.nStates==1):
+            return np.subtract(np.multiply(np.random.rand(self.nDim),20),10)
+        elif(self.nStates >1 and self.states_coupled):
+            position = np.subtract(np.multiply(np.random.rand(self.nDim), 20), 10)
+            return [position for state in range(self.nStates)]
+        else:
+            return [np.subtract(np.multiply(np.random.rand(self.nDim), 20), 10) for state in range(self.nStates)]
 
     def append_state(self, newPosition, newVelocity, newForces):
         self._currentPosition = newPosition

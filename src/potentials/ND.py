@@ -15,39 +15,23 @@ class _potentialNDCls:
     '''
     name:str = "Unknown"
     nDim:int =0
+    _no_Type_check:bool=False
+    _singlePos_mode:bool = False
+
 
     def __init__(self):
+        self._calculate_energies=self._calculate_energies_multiPos
+        self._calculate_dhdpos=self._calculate_dhdpos_multiPos
+        self._check_positions_type= self._check_positions_type_multiPos
+
         return
 
     def __name__(self)->str:
         return str(self.name)
 
-    @classmethod
-    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        """
-            .. autofunction:: _check_positions_type
-            This function is parsing and checking all possible inputs to avoid misuse of the functions.
-        :param positions: here the positions that shall be evaluated by the potential should be given.
-        :type positions:  t.Union[t.Iterable[numbers.Number], numbers.Number]
-        :return: returns the evaluated potential values
-        :return type: t.List[float]
-        """
-
-        #array
-        if((isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0)
-            and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions]))
-            or (isinstance(positions, Iterable) and all([isinstance(coord, Iterable) and (len(coord) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in coord]) for coord in positions]))
-            or isinstance(positions, Iterable) and (len(positions) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in positions])
-            or isinstance(positions, numbers.Number)):
-            return np.array(positions, ndmin=2)
-        else:
-            raise Exception("list dimensionality does not fit to potential dimensionality! Input: " + str(positions))
-
-    def _calculate_energies(self, positions:t.List[float]):
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
-
-    def _calculate_dhdpos(self, positions:t.List[float]):
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
+    """
+        public
+    """
 
     def ene(self, positions:(t.List[float] or float)) -> (t.List[float] or float):
         '''
@@ -69,6 +53,161 @@ class _potentialNDCls:
         '''
         positions = self._check_positions_type(positions)
         return self._calculate_dhdpos(positions)
+
+    """
+        private
+    """
+    """
+            dummies
+    """
+    @classmethod
+    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]) -> np.array:
+        """
+            .. autofunction:: _check_positions_type
+            This function is parsing and checking all possible inputs to avoid misuse of the functions.
+        :param positions: here the positions that shall be evaluated by the potential should be given.
+        :type positions:   t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]
+        :return: returns the evaluated potential values
+        :return type: t.List[float]
+        """
+        raise Exception(__name__+"_Dummy Was not initialized! please call super constructor "+__class__.__name__+"!")
+
+    def _calculate_energies(cls, positions: t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]) -> np.array:
+        """
+            .. autofunction:: _calculate_energies
+
+        :param positions:
+        :type positions:  t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]
+        :return:
+        :return type: np.array
+        """
+        raise Exception(__name__+"_Dummy Was not initialized! please call super constructor "+__class__.__name__+"!")
+
+    def _calculate_dhdpos(cls, positions: t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]) -> np.array:
+        """
+            .. autofunction:: _calculate_dhdpos
+
+        :param positions:
+        :type positions:  t.Union[t.Iterable[numbers.Number], t.Iterable[t.Iterable[numbers.Number]], numbers.Number]
+        :return:
+        :return type: np.array
+        """
+        raise Exception(__name__ + "_Dummy Was not initialized! please call super constructor " + __class__.__name__ + "!")
+
+
+    """
+            type Juggeling and interface methods setting 
+    """
+    @classmethod
+    def _check_positions_type_singlePos(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
+        """
+            .. autofunction:: _check_positions_type
+            This function is parsing and checking all possible inputs to avoid misuse of the functions.
+        :param positions: here the positions that shall be evaluated by the potential should be given.
+        :type positions:  t.Union[t.Iterable[numbers.Number], numbers.Number]
+        :return: returns the evaluated potential values
+        :return type: t.List[float]
+        """
+
+        #array
+        if((isinstance(positions, Iterable) and all([isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0)
+            and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions]))
+            or (isinstance(positions, Iterable) and all([isinstance(coord, Iterable) and (len(coord) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in coord]) for coord in positions]))
+            or isinstance(positions, Iterable) and (len(positions) == cls.nDim or cls.nDim == 0) and all([isinstance(pos, numbers.Number) for pos in positions])
+            or isinstance(positions, numbers.Number)):
+            return np.array(positions, ndmin=2)
+        else:
+            raise Exception("list dimensionality does not fit to potential dimensionality! Input: " + str(positions))
+
+    @classmethod
+    def _check_positions_type_multiPos(cls,
+                                        positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
+        """
+            .. autofunction:: _check_positions_type
+            This function is parsing and checking all possible inputs to avoid misuse of the functions.
+        :param positions: here the positions that shall be evaluated by the potential should be given.
+        :type positions:  t.Union[t.Iterable[numbers.Number], numbers.Number]
+        :return: returns the evaluated potential values
+        :return type: t.List[float]
+        """
+
+        # array
+        if ((isinstance(positions, Iterable) and all(
+                [isinstance(dimPos, Iterable) and (all([len(x) == cls.nDim for x in positions]) or cls.nDim == 0)
+                 and all([isinstance(pos, numbers.Number) for pos in dimPos]) for dimPos in positions]))
+                or (isinstance(positions, Iterable) and all([isinstance(coord, Iterable) and (
+                        len(coord) == cls.nDim or cls.nDim == 0) and all(
+                    [isinstance(pos, numbers.Number) for pos in coord]) for coord in positions]))
+                or isinstance(positions, Iterable) and (len(positions) == cls.nDim or cls.nDim == 0) and all(
+                    [isinstance(pos, numbers.Number) for pos in positions])
+                or isinstance(positions, numbers.Number)):
+            return np.array(positions, ndmin=2)
+        else:
+            raise Exception("list dimensionality does not fit to potential dimensionality! Input: " + str(positions))
+
+    def _calculate_dhdpos_singlePos(self, positions:t.List[float]):
+        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
+
+    def _calculate_dhdpos_multiPos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
+        return np.array(list(map(self._calculate_dhdpos_singlePos, positions)))
+
+    def _calculate_energies_singlePos(self, position:float) ->  float:
+        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
+
+    def _calculate_energies_multiPos(self, positions: (t.Iterable[float] or np.array)) ->  np.array:
+        """
+        ..autofunction :: _calculate_energies_multiPos
+
+        :return:  -
+        """
+        return np.array(list(map(self._calculate_energies_singlePos, positions)))
+
+    """
+            Input - Options
+                For Performance or easier use!
+    """
+    def _set_singlePos_mode(self):
+        """
+        ..autofunction :: _set_singlePos_mode
+
+        :return:  -
+        """
+        self._singlePos_mode = True
+        self._calculate_energies = self._calculate_energies_singlePos
+        self._calculate_dhdpos = self._calculate_dhdpos_singlePos
+
+    def _set_multiPos_mode(self):
+        """
+        ..autofunction :: _set_multiPos_mode
+
+        :return:  -
+        """
+        self._singlePos_mode = False
+        self._calculate_energies = self._calculate_energies_multiPos
+        self._calculate_dhdpos = self._calculate_dhdpos_multiPos
+
+    def _set_no_type_check(self):
+        """
+        ..autofunction :: _set_no_type_check
+            This function is trying to speed up execution for cases, in that the position Type is known to be correct (system integration) ...
+
+        :return:  -
+        """
+        _no_Type_check = True
+        self.ene = self._calculate_energies
+        self.dhdpos = self._calculate_dhdpos
+
+    def _set_type_check(self):
+        """
+        ..autofunction :: _set_type_check
+            This function is setting the default potential Value, to allow secure execution in small code snippets
+        :return:  -
+        """
+        _no_Type_check = False
+        self.ene = lambda positions: self._calculate_energies(self._check_positions_type(positions))
+        self.dhdpos = lambda positions: self._calculate_dhdpos(self._check_positions_type(positions))
+
+
 
 """
 standard potentials
@@ -237,8 +376,7 @@ class envelopedPotential(_potentialNDCls):
             else:
                 raise Exception("This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
         else:
-            raise Exception(
-                "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
+            raise Exception("This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
     def _check_positions_type1D(self, positions: (numbers.Number or t.Iterable[float] or t.Iterable[t.Iterable[float]])) -> np.array:
         if (isinstance(positions, numbers.Number)):
@@ -248,8 +386,7 @@ class envelopedPotential(_potentialNDCls):
         elif (isinstance(positions, Iterable) and len(positons) == len(self.V_is) and all([isinstance(pos, Iterable) for pos in positions])):
             return np.array([positions for state in range(self.numStates)], ndmin=2)
         else:
-            raise Exception(
-                "This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
+            raise Exception("This is an unknown type of Data structure: " + str(type(positions)) + "\n" + str(positions))
 
     def _calculate_energies1D(self, positions: (t.List[float] or float)) -> list:
         #print(positions)

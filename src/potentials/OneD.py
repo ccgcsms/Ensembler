@@ -17,7 +17,6 @@ from Ensembler.src.potentials.ND import envelopedPotential  #for user convenienc
 class _potential1DCls(ND._potentialNDCls):
     '''
         .. autoclass:: _potentialCls
-
         This class is the
     '''
 
@@ -40,35 +39,12 @@ class _potential1DCls(ND._potentialNDCls):
             return np.array(positions, ndmin=1)
         elif (isinstance(positions, Iterable) and (type(positions) != type(None) and len(positions)==1) and all([isinstance(pos, numbers.Number) for pos in positions[0]])):
             return np.array(positions[0], ndmin=1)
-
         else:
             if(type(positions) == type(None) ):
                 raise Exception("potential got None as position")
-
             else:
                 raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
                     len(positions)) + " potential Dimensions " + str(cls.nDim))
-
-    def ene(self, positions:(t.Iterable[float] or np.array or float)) -> (t.List[float] or float):
-        '''
-        calculates energy of particle
-        :param lam: alchemical parameter lambda
-        :param pos: position on 1D potential energy surface
-        :return: energy
-        '''
-
-        positions = self._check_positions_type(positions)
-        return self._calculate_energies(positions)
-
-    def dhdpos(self, positions:(t.Iterable[float] or np.array  or float)) -> (t.List[float] or float):
-        '''
-        calculates derivative with respect to position
-        :param lam: alchemical parameter lambda
-        :param pos: position on 1D potential energy surface
-        :return: derivative dh/dpos
-        '''
-        positions = self._check_positions_type(positions)
-        return self._calculate_dhdpos(positions)
 
 
 """
@@ -121,11 +97,14 @@ class harmonicOsc(_potential1DCls):
         self.x_shift = x_shift
         self.y_shift = y_shift
 
-    def _calculate_energies(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
-        return np.array(list(map(lambda pos: 0.5 * self.fc * (pos - self.x_shift) ** 2 - self.y_shift, positions)))
+    def _calculate_energies_singlePos(self, position:float) ->  float:
+        return 0.5 * self.fc * (position - self.x_shift) ** 2 - self.y_shift
 
-    def _calculate_dhdpos(self, positions: (t.Iterable[float] or np.array or float)) ->  np.array:
-        return np.array(list(map(lambda pos: self.fc * (pos - self.x_shift), positions)))
+    def _calculate_dhdpos_singlePos(self, position:float) ->  float:
+        return self.fc * (position - self.x_shift)
+
+
+
 
 class wavePotential(_potential1DCls):
     '''
