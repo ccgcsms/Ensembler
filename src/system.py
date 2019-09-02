@@ -4,13 +4,14 @@ Module: System
 """
 
 import numpy as np
-from typing import Iterable
+from typing import Iterable, NoReturn
 from numbers import Number
 import pandas as pd
 import scipy.constants as const
-
+pd.options.mode.use_inf_as_na = True
 from Ensembler.src import dataStructure as data
-from Ensembler.src.potentials.OneD import _potential1DCls as _potentialCls, _perturbedPotential1DCls as _perturbedPotentialCls
+from Ensembler.src.potentials.ND import _potentialNDCls as _potentialCls, envelopedPotential
+from Ensembler.src.potentials.OneD import _perturbedPotential1DCls as _perturbedPotentialCls
 
 from Ensembler.src.integrator import _integratorCls
 from Ensembler.src.conditions.conditions import Condition
@@ -22,44 +23,57 @@ class system:
     Different integrators/propagators can be chosen to create an ensemble of states.
     Also other parameters are tunable.
     '''
-    state = data.basicState
 
-    #settings:
+    #Parameters
+    ##essential parts
     potential:_potentialCls = None
     integrator:_integratorCls = None
-    conditions=[]
+    conditions:Iterable[Condition]=[]
     
-    #parameters
+    ##Physical paramerters
     temperature:float = 298.0
     mass:float = 1 #for one particle systems!!!!
     nparticles:int =1 #Todo: adapt it to be multiple particles
+
     nDim:int=-1
-    initial_positions:Iterable[float]
-    
-    #output
-    currentState:state = None
-    trajectory:list = []
+    nStates:int = 1
+
+    #Output
+    state = data.basicState
+    initial_positions: Iterable[float] or float
+    currentState:data.basicState = data.basicState(np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+    trajectory:Iterable[data.basicState] = []
         
     #tmpvars - private:
-    _currentTotPot:(Number or Iterable[Number]) = None
-    _currentTotKin:(Number or Iterable[Number]) = None
-    _currentPosition:(Number or Iterable[Number]) = None
-    _currentVelocities:(Number or Iterable[Number]) = None
-    _currentForce:(Number or Iterable[Number]) = None
-    _currentTemperature:(Number or Iterable[Number]) = None
+    _currentTotE:(Number) = np.nan
+    _currentTotPot:(Number) = np.nan
+    _currentTotKin:(Number) = np.nan
+    _currentPosition:(Number or Iterable[Number]) = np.nan
+    _currentVelocities:(Number or Iterable[Number]) = np.nan
+    _currentForce:(Number or Iterable[Number]) = np.nan
+    _currentTemperature:(Number or Iterable[Number]) = np.nan
 
     def __init__(self, potential:_potentialCls, integrator:_integratorCls, conditions:Iterable[Condition]=[],
-                 temperature:float=298.0, position:(Iterable[float] or float)=None, mass:float=1):
+                 temperature:Number=298.0, position:(Iterable[Number] or Number)=None, mass:Number=1)->NoReturn:
 
-        #params
+        #BUILD System
+        ## Fundamental Parts:
         self.potential = potential
         self.integrator = integrator
         self.conditions = conditions
+
+        ## Physical Paramters
+        if(potential.nDim < 1 and isinstance(position, Iterable) and all([isinstance(pos, Number) for pos in position])):  #one  state system.
+            self.nDim = len(position)
+            self.potential.nDim = self.nDim
+        elif(potential.nDim > 0):
+            self.nDim = potential.nDim
+        else:
+            raise IOError("Could not estimate the disered Dimensionality as potential dim was <1 and no initial position was given.")
         self.temperature = temperature
         self.mass = mass
-        self.nDim = potential.nDim
 
-        #is the potential a state dependent one? - needed for initial pos.
+        ###is the potential a state dependent one? - needed for initial pos.
         if(hasattr(potential, "nStates")):
             self.nStates = potential.nStates
             if(hasattr(potential, "states_coupled")):   #does each state get the same position?
@@ -69,11 +83,13 @@ class system:
         else:
             self.nstates = 1
 
-        #Settings for potential
-        potential._set_no_type_check()  #initially taken care by system. Saves performance!
-        potential.set_singlePos_mode()  #easier execution... does apparently not save so much performacne
+        #PREPARE THE SYSTEM
+        ##Make System Potential and initial State
+        self.potential._set_singlePos_mode()    #easier execution... does apparently not save so much performacne
+        self.init_state(initial_position=position)
+        self.potential._set_no_type_check()     #initially taken care by system. Saves performance!
 
-        #check if system is coupled to conditions:
+        ##check if system should be coupled to conditions:
         for condition in self.conditions:
             if(not hasattr(condition, "system")):
                 condition.coupleSystem(self)
@@ -82,49 +98,86 @@ class system:
             else:
                 condition.dt=1
 
-        #define dims of system. #Todo: only true for one dim Pot.
-        self.init_state(initial_position=position)
+    """
+        Initialisation
+    """
 
     def init_state(self, initial_position=None):
         #initial position given?
-        if (initial_position == None):
-            self.initial_positions  = self.randomPos()
+        if (type(initial_position) == type(None)):
+            self.initial_positions = self.potential._check_positions_type_singlePos(self.randomPos())
         else:
-            self.initial_positions = initial_position
-
-        self._currentForce = self.potential.dhdpos(self.initial_positions)  #initialise forces!
+            self.initial_positions = self.potential._check_positions_type_singlePos(initial_position)
+        #self._currentForce = self.potential.dhdpos(self.initial_positions)  #initialise forces!    #todo!
 
         #set a new current_state
         self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature)
 
+    def initVel(self)-> NoReturn:
+        self._currentVelocities = [self._gen_rand_vel() for dim in range(self.nDim)] if(self.nDim>1) else self._gen_rand_vel()
+        self.veltemp = self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2  # t
+        return self._currentVelocities
+
+    def _gen_rand_vel(self)->float:
+        return np.sqrt(const.gas_constant / 1000.0 * self.temperature / self.mass) * np.random.normal()
+
     def randomPos(self)-> Iterable:
+        print("STATES ARE BIIG")
         if(self.nStates==1):
-            return np.subtract(np.multiply(np.random.rand(self.nDim),20),10)
+            return self.potential._check_positions_type_singlePos(np.subtract(np.multiply(np.random.rand(self.nDim),20),10))
         elif(self.nStates >1 and self.states_coupled):
+            print("Found MultiStates")
             position = np.subtract(np.multiply(np.random.rand(self.nDim), 20), 10)
-            return [position for state in range(self.nStates)]
+            print(position)
+            mPos = self.potential._check_positions_type_singlePos(np.array(list(zip(*[position for state in range(self.nStates)])), ndmin=2))
+            print(mPos)
+            return mPos
         else:
-            return [np.subtract(np.multiply(np.random.rand(self.nDim), 20), 10) for state in range(self.nStates)]
+            return self.potential._check_positions_type_singlePos([np.subtract(np.multiply(np.random.rand(self.nDim), 20), 10) for state in range(self.nStates)])
 
-    def append_state(self, newPosition, newVelocity, newForces):
-        self._currentPosition = newPosition
-        self._currentVelocities = newVelocity
-        self._currentForce = newForces
+    """
+        Update
+    """
+    def totKin(self)-> (Iterable[Number] or Number or None):
+        # Todo: more efficient if?
+        if(self.nDim == 1 and isinstance(self._currentVelocities, Number) and not np.isnan(self._currentVelocities)):
+            return 0.5 * self.mass * np.square(np.linalg.norm(self._currentVelocities))
+        elif(self.nDim > 1 and isinstance(self._currentVelocities, Iterable) and all([isinstance(x, Number) and not np.isnan(x) for x in self._currentVelocities])):
+            return np.sum(0.5 * self.mass * np.square(np.linalg.norm(self._currentVelocities)))
+        else:
+            return np.nan
 
-        self.updateTemp()
-        self.updateEne()
-        self.updateCurrentState()
+    def totPot(self)-> (Iterable[Number] or Number or None):
+        return self.potential.ene(self._currentPosition)
 
-        self.trajectory.append(self.currentState)
+    def updateTemp(self)-> NoReturn:
+        """ this looks like a thermostat like thing! not implemented!@ TODO calc velocity from speed"""
+        self._currentTemperature = self._currentTemperature
 
-    def propagate(self):
-        self._currentPosition, self._currentVelocities, self._currentForce = self.integrator.step(self) #self.current_state)
+    def updateEne(self)-> NoReturn:
+        self._currentTotPot = self.totPot()
+        self._currentTotKin = self.totKin()
+        self._currentTotE = self._currentTotPot if(np.isnan(self._currentTotKin))else np.add(self._currentTotKin, self._currentTotPot)
 
-    def revertStep(self):
-        self.currentState = self.trajectory[-2]
-        return
+    def updateCurrentState(self)-> NoReturn:
+        self.currentState = self.state(self._currentPosition, self._currentTemperature,
+                                        self._currentTotE, self._currentTotPot, self._currentTotKin,
+                                        self._currentForce, self._currentVelocities)
 
-    def simulate(self, steps:int, initSystem:bool=True, withdrawTraj:bool=False, save_every_state:int=1):
+    def _update_current_vars(self):
+        self._currentPosition = self.currentState.position
+        self._currentTemperature = self.currentState.temperature
+        self._currentTotE = self.currentState.totEnergy
+        self._currentTotPot = self.currentState.totPotEnergy
+        self._currentTotKin = self.state.totKinEnergy
+        self._currentForce = self.currentState.dhdpos
+        self._currentVelocities = self.currentState.velocity
+
+    """
+        Functionality
+    """
+
+    def simulate(self, steps:int, initSystem:bool=True, withdrawTraj:bool=False, save_every_state:int=1)-> state:
         if(steps > 1000):
             show_progress =True
             block_length = steps*0.1
@@ -167,44 +220,38 @@ class system:
         if(show_progress): print("100%")
         return self.currentState
 
-    def applyConditions(self):
+    def propagate(self)->NoReturn:
+        self._currentPosition, self._currentVelocities, self._currentForce = self.integrator.step(self)
+
+    def applyConditions(self)-> NoReturn:
         for aditional in self.conditions:
             aditional.apply()
 
-    def initVel(self):
-        self._currentVelocities = np.array([np.sqrt(const.gas_constant / 1000.0 * self.temperature / self.mass) * np.random.normal() for dim in range(self.nDim)])
-        self.veltemp = self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2  # t
-        return self._currentVelocities
+    def append_state(self, newPosition, newVelocity, newForces)->NoReturn:
+        self._currentPosition = newPosition
+        self._currentVelocities = newVelocity
+        self._currentForce = newForces
 
-    def updateTemp(self):
-        """ this looks like a thermostat like thing! not implemented!@ TODO calc velocity from speed"""
-        self._currentTemperature = self._currentTemperature
-
-    def updateEne(self):
-        self._currentTotPot = self.totPot()
-        self._currentTotKin = self.totKin()
-
-    def updateCurrentState(self):
-        self.currentState = self.state(self._currentPosition, self._currentTemperature,
-                                        (self._currentTotKin+self._currentTotPot),
-                                        self._currentTotPot, self._currentTotKin,
-                                        self._currentForce, self._currentVelocities)
-
-    def totKin(self):
-        if(self._currentVelocities != None):
-            return 0.5 * self.mass * np.square(np.linalg.norm(self._currentVelocities))  #Todo: velocities is a VECTOR not sum but vector length is needed
-        else:
-            return 0
-
-    def totPot(self)->float:
-        return float(np.sum(self.potential.ene(self._currentPosition)))
-
-    def getPot(self)->Iterable[float]:
-        return self.potential.ene(self._currentPosition)
-
-    def getTotEnergy(self):
+        self.updateTemp()
         self.updateEne()
-        return np.add(self.totPot(), self.totKin())
+        self.updateCurrentState()
+
+        self.trajectory.append(self.currentState)
+
+    def revertStep(self)-> NoReturn:
+        self.currentState = self.trajectory[-2]
+        self._update_current_vars()
+        return
+
+    """
+        Getter
+    """
+
+    def getTotPot(self)-> (Iterable[Number] or Number or None):
+        return self._currentTotPot
+
+    def getTotEnergy(self)-> (Iterable[Number] or Number or None):
+        return self._currentTotE
 
     def getCurrentState(self)->state:
         return self.currentState
@@ -220,7 +267,7 @@ class system:
         self._currentForce = currentForce
         self._currentVelocities = currentVelocities
         self._currentTemperature = currentTemperature
-        self.currentState = self.state(self._currentPosition, self._currentTemperature,0, 0, 0, 0, 0)
+        self.currentState = self.state(self._currentPosition, self._currentTemperature, np.nan, np.nan, np.nan, np.nan, np.nan)
 
         self.updateEne()
         self.updateCurrentState()
@@ -241,11 +288,11 @@ class perturbedSystem(system):
     currentState: data.lambdaState
     potential: _perturbedPotentialCls
     #current lambda
-    _currentLam:float = None
-    _currentdHdLam:float = None
+    _currentLam:float = np.nan
+    _currentdHdLam:float = np.nan
 
     def __init__(self, potential:_perturbedPotentialCls, integrator: _integratorCls, conditions: Iterable[Condition]=[],
-                 temperature: float = 298.0, position:(Iterable[Number] or float) = None, lam:float=0.0):
+                 temperature: float = 298.0, position:(Iterable[Number] or float) = np.nan, lam:float=0.0):
 
         self._currentLam = lam
         if(not isinstance(potential, _perturbedPotentialCls)):
@@ -257,54 +304,56 @@ class perturbedSystem(system):
                 Exception(
                     "Potential: " + potential.name + " has not an attribute lam. But this attribute is needed for representing lambda! Please add the field for: " + __class__.__name__)
 
-        super().__init__(potential=potential, integrator=integrator, conditions=conditions,
-                 temperature=temperature, position=position)
+        super().__init__(potential=potential, integrator=integrator, conditions=conditions, temperature=temperature, position=position)
 
 
     def init_state(self, initial_position=None):
         #initial position given?
-        if (initial_position == None):
-            self.initial_positions  = self.randomPos()
+        if (type(initial_position) == type(None)):
+            self.initial_positions = self.potential._check_positions_type_singlePos(self.randomPos())
         else:
-            self.initial_positions = initial_position
+            self.initial_positions = self.potential._check_positions_type_singlePos(initial_position)
+
+        #self._currentForce = self.potential.dhdpos(self.initial_positions)  #initialise forces!    #todo!
 
         #set a new current_state
-        self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature, currentLambda=self._currentLam, currentdHdLam=self._currentdHdLam)
+        self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature,
+                               currentLambda=self._currentLam, currentdHdLam=self._currentdHdLam)
 
-    def set_current_state(self, currentPosition:(Number or Iterable), currentLambda:(Number or Iterable), currentVelocities:(Number or Iterable)=0,  currentdHdLam:(Number or Iterable)=0,
+    def initVel(self)-> NoReturn:
+        self._currentVelocities = np.array([[self._gen_rand_vel() for dim in range(self.nDim)] for state in range(self.nStates)] if(self.nDim>1) else [self._gen_rand_vel() for state in range(self.nStates)])
+        self.veltemp = np.sum(self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2) # t
+        return self._currentVelocities
+
+    def set_current_state(self, currentPosition:(Number or Iterable), currentLambda:(Number or Iterable),
+                          currentVelocities:(Number or Iterable)=0,  currentdHdLam:(Number or Iterable)=0,
                           currentForce:(Number or Iterable)=0, currentTemperature:Number=298):
         self._currentPosition = currentPosition
         self._currentForce = currentForce
         self._currentVelocities = currentVelocities
         self._currentTemperature = currentTemperature
 
-        self.currentState = self.state(position=self._currentPosition, temperature=self._currentTemperature,
-                                       totEnergy=0,
-                                       totPotEnergy=0, totKinEnergy=0,
-                                       dhdpos=self._currentForce, velocity=self._currentVelocities,
-                                       lam=self._currentLam, dhdlam=0)
-
         self.updateEne()
         self.updateCurrentState()
 
     def updateCurrentState(self):
         self.currentState = self.state(position=self._currentPosition, temperature=self._currentTemperature,
-                                       totEnergy=(self._currentTotKin + self._currentTotPot),
+                                       totEnergy=self._currentTotE,
                                        totPotEnergy=self._currentTotPot, totKinEnergy=self._currentTotKin,
                                        dhdpos=self._currentForce, velocity=self._currentVelocities,
                                        lam=self._currentLam, dhdlam=self._currentdHdLam)
 
-
-
-    """
+    """ 
     def updateEne(self):
         self._currentTotPot = self.totPot()
         self._currentTotKin = self.totKin()
-        self._currentTotE = self._currentTotKin + self._currentTotPot
-        self.redene = np.divide(self._currentTotE, np.divide(const.gas_constant, np.multiply(1000.0, self._currentPosition)))
+        self._currentTotE = self._currentTotPot if(np.isnan(self._currentTotKin))else np.add(self._currentTotKin, self._currentTotPot)
+
+        #self.redene = np.divide(self._currentTotE, np.divide(const.gas_constant, np.multiply(1000.0, self._currentPosition)))
     """
+
     def append_state(self, newPosition, newVelocity, newForces, newLam):
-        self._currentPosition = newPosition
+        self._currentPosition = self.potential._check_positions_type_singlePos(newPosition)
         self._currentVelocities = newVelocity
         self._currentForce = newForces
         self._currentLam = newLam

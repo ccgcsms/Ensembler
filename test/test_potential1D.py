@@ -19,7 +19,7 @@ class potential1DCls(unittest.TestCase):
     def test_check_positions_float_type(self):
         #check single Float
         position = 1.0
-        checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+        checked_pos = pot._potential1DCls._check_positions_type_multiPos(positions=position)
 
         print(checked_pos)
         if(not isinstance(checked_pos, Iterable)):
@@ -32,7 +32,7 @@ class potential1DCls(unittest.TestCase):
     def test_check_positions_npArray_type(self):
         #check nparray
         position = np.arange(1,10)
-        checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+        checked_pos = pot._potential1DCls._check_positions_type_multiPos(positions=position)
         print(checked_pos)
 
         if (not isinstance(checked_pos, Iterable)):
@@ -46,7 +46,7 @@ class potential1DCls(unittest.TestCase):
     def test_check_positions_list_type(self):
         #check LIST[Float]
         position = [1.0, 2.0, 3.0]
-        checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+        checked_pos = pot._potential1DCls._check_positions_type_multiPos(positions=position)
         print(checked_pos)
 
         if (not isinstance(checked_pos, Iterable)):
@@ -60,7 +60,7 @@ class potential1DCls(unittest.TestCase):
     def test_check_positions_nDlist_type(self):
         position = [[1.0, 2.0, 3.0]]
         expected = [1.0, 2.0, 3.0]
-        checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+        checked_pos = pot._potential1DCls._check_positions_type_multiPos(positions=position)
 
         if (not isinstance(checked_pos, Iterable)):
             print(type(checked_pos), type(checked_pos[0]))
@@ -73,12 +73,13 @@ class potential1DCls(unittest.TestCase):
         position = [[1.0, 2.0], [3.0, 4.0]]
         expected = 'list dimensionality does not fit to potential dimensionality! len(list)=2 potential Dimensions 1'
         try:
-            checked_pos = pot._potential1DCls._check_positions_type(positions=position)
+            checked_pos = pot._potential1DCls._check_positions_type_multiPos(positions=position)
         except Exception as err:
             print(err.args)
             self.assertEqual(expected, err.args[0])
             print("Found Err")
             return 0
+        print(checked_pos)
         print("Did finish without error!")
         exit(1)
 

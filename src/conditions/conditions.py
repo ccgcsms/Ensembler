@@ -7,7 +7,7 @@ Module: Conditions
 
 class Condition:
     _tau:float  #tau = apply every tau steps
-
+    nDim:int=0
     def __init__(self , sys):   #system):
         raise NotImplementedError("This " + __class__ + " class is not implemented")
 
@@ -16,6 +16,8 @@ class Condition:
 
     def coupleSystem(self, system): #sys):
         self.system = system
+        self.nDim = system.nDim
+        self.nStates = system.nStates
 
 class Constraint(Condition):
     pass

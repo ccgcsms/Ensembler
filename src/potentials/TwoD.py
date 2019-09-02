@@ -18,16 +18,31 @@ class _potential2DCls(ND._potentialNDCls):
     '''
     nDim:int =2
 
-    @classmethod
-    def _check_positions_type(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        positions = super()._check_positions_type(positions=positions)
+    def __init__(self):
+        super().__init__()
+        self.nDim:int =2
 
+    @classmethod
+    def _check_positions_type_singlePos(cls, position: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
+        positions = super()._check_positions_type_singlePos(position=position)
         if(all([len(pos) == cls.nDim for pos in positions])):
             return positions
         else:
             raise Exception("Dimensionality is not correct for positions! "+str(positions))
 
-class wavePotential2D(_potential2DCls):
+    @classmethod
+    def _check_positions_type_multiPos(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
+        positions = super()._check_positions_type_multiPos(positions=positions)
+
+        #dim check
+        if(len(positions) == 1 and all([ isinstance(pos, t.Iterable) and len(pos) == cls.nDim  and all([isinstance(x, numbers.Number) for x in pos]) for pos in positions[0]])):
+            return positions[0]
+        elif(all([len(pos) == cls.nDim for pos in positions])):
+            return positions
+        else:
+            raise Exception("Dimensionality is not correct for positions! "+str(positions))
+
+class wavePotential(_potential2DCls):
 
     '''
 
@@ -36,11 +51,11 @@ class wavePotential2D(_potential2DCls):
     '''
 
     name:str = "Wave Potential"
-    phase_shift:float = 0.0
-    amplitude:float = 1.0
-    multiplicity:float = 1.0
+    phase_shift:(np.array or list) = [0.0, 0.0]
+    amplitude:(np.array or list) = [1.0 , 1.0]
+    multiplicity:(np.array or list) = [1.0, 1.0]
+    y_offset:(np.array or list)= (0.0, 0.0)
     radians:bool = False
-    y_offset:tuple = (0.0,0.0)
 
     def __init__(self,  phase_shift:tuple=(0.0, 0.0), multiplicity:tuple=(1.0, 1.0), amplitude:tuple=(1.0, 1.0), y_offset:tuple=(0,0), radians:bool=False):
 
@@ -57,41 +72,71 @@ class wavePotential2D(_potential2DCls):
         self.y_offset = y_offset
 
         if(radians):
-            self.phase_shift = phase_shift
+            if(isinstance(phase_shift, numbers.Number)):
+                self.phase_shift = [phase_shift, phase_shift]
+            else:
+                self.phase_shift = phase_shift
         else:
-            self.phase_shift = np.deg2rad(phase_shift)
+            if(isinstance(phase_shift, numbers.Number)):
+                self.phase_shift = np.deg2rad([phase_shift, phase_shift])
+            else:
+                self.phase_shift = np.deg2rad(phase_shift)
 
-    def set_degrees(self, degrees:bool=True):
-        self.set_radians(radians=not degrees)
+    def _calculate_energies_singlePos(self, position: np.array) -> float:
+        return sum(list(map(lambda ind,coord: self.amplitude[ind]*math.cos(self.multiplicity[ind]*(coord + self.phase_shift[ind]))+self.y_offset[ind], range(2), position)))
 
-    def set_radians(self, radians:bool=True):
-        self.radians=radians
+    def _calculate_dhdpos_singlePos(self, position: np.array) -> np.array:
+        return np.array(list(map(lambda ind, coord: self.amplitude[ind]*math.sin(self.multiplicity[ind]*(coord + self.phase_shift[ind]))+self.y_offset[ind], range(2),position)))
 
-        if(radians):
-            self._calculate_energies = lambda positions: np.array(list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(coords)]), positions)))
-
-            self._calculate_dhdpos =  lambda positions: np.array(list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(coords)]), positions)))
-
+    def _set_singlePos_mode(self):
+        self._singlePos_mode = True
+        if(self.radians):
+            self.set_radians()
         else:
-            self._calculate_energies = lambda positions: np.array(list(map(lambda coords:
-                          sum([self.amplitude[ind]*math.cos(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(np.deg2rad(coords))]), positions)))
+            self.set_degrees()
 
-            self._calculate_dhdpos =  lambda positions: np.array(list(map(lambda coords:
-                          [self.amplitude[ind]*math.sin(self.multiplicity[ind]*(x + self.phase_shift[ind]))+self.y_offset[ind] for ind,x in enumerate(np.deg2rad(coords))], positions)))
+    def _set_multiPos_mode(self):
+        self._singlePos_mode = False
+        if(self.radians):
+            self.set_radians()
+        else:
+            self.set_degrees()
+
+    def set_degrees(self, degrees: bool = True):
+        self.radians = not degrees
+        if (degrees):
+            if (self._singlePos_mode):
+                self._calculate_energies = lambda positions: self._calculate_energies_singlePos(np.deg2rad(positions))
+                self._calculate_dhdpos = lambda positions: self._calculate_dhdpos_singlePos(np.deg2rad(positions))
+            else:
+                self._calculate_energies = lambda positions: self._calculate_energies_multiPos(np.deg2rad(positions))
+                self._calculate_dhdpos = lambda positions: self._calculate_dhdpos_multiPos(np.deg2rad(positions))
+        else:
+            self.set_radians(radians=not degrees)
+
+    def set_radians(self, radians: bool = True):
+        self.radians = radians
+        if (radians):
+            if(self._singlePos_mode):
+                self._calculate_energies  = self._calculate_energies_singlePos
+                self._calculate_dhdpos = self._calculate_dhdpos_singlePos
+            else:
+                self._calculate_energies  = self._calculate_energies_multiPos
+                self._calculate_dhdpos = self._calculate_dhdpos_multiPos
+        else:
+            self.set_degrees(degrees=not radians)
 
 
-class torsionPotential2D(_potential2DCls):
+class torsionPotential(_potential2DCls):
     '''
         .. autoclass:: Torsion Potential
     '''
     name:str = "Torsion Potential"
 
     phase:float=1.0
-    wave_potentials:t.List[wavePotential2D]=[]
+    wave_potentials:t.List[wavePotential]=[]
 
-    def __init__(self, wave_potentials:t.List[wavePotential2D]):
+    def __init__(self, wave_potentials:t.List[wavePotential]):
         '''
         initializes torsions Potential
         '''
