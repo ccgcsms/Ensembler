@@ -17,6 +17,7 @@ class _integratorCls:
     """
     #general:
     verbose:bool = False
+    nDim:int = 0
 
     #Params
     maxStepSize:float = None
@@ -91,9 +92,10 @@ class monteCarloIntegrator(_integratorCls):
                 break
             else:
                 self.newPos = self.oldpos           #reject step outside of range
-        return self.newPos, None, self.posShift
+
+        return self.newPos, np.nan, self.posShift
     
-    def randomShift(self, nDim)->float:
+    def randomShift(self, nDim:int)->float:
         """
         ..autofunction: randomShift
             This function calculates the shift for the current position.
@@ -102,7 +104,7 @@ class monteCarloIntegrator(_integratorCls):
         :rtype: float
         """
         #which sign will the shift have?
-        sign = np.array([-1 if(x <50) else 1 for x in np.random.randint(low=0, high=100,size=nDim)])
+        sign = np.array([-1 if(x <50) else 1 for x in np.random.randint(low=0, high=100, size=nDim)])
 
         #Check if there is a space restriction? - converges faster
         if(self.spaceRange!=None):
@@ -117,6 +119,10 @@ class monteCarloIntegrator(_integratorCls):
             self.posShift = np.multiply(sign, self.minStepSize)
         else:
             self.posShift = np.multiply(sign, shift)
+
+        if(nDim == 1):  #TODO Make Effiecient?
+            self.posShift = self.posShift[0]
+
         return self.posShift
 
 class metropolisMonteCarloIntegrator(monteCarloIntegrator):
