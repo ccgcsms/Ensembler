@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(__file__)+"/..")
 
 from Ensembler.src.system import system
 
-def animation_trajectory(sys: system, x_range=None, title:str=None, out_path:str=None, out_writer:str="pillow", dpi:int=100)-> (animation.Animation, (str or None)):
+def animation_trajectory(sys: system, x_range=None, y_range=None, title:str=None, out_path:str=None, out_writer:str="pillow", dpi:int=100)-> (animation.Animation, (str or None)):
     # plotting
     x1data = [state.position for state in sys.trajectory]
     y1data = [state.totPotEnergy for state in sys.trajectory]
@@ -20,6 +20,7 @@ def animation_trajectory(sys: system, x_range=None, title:str=None, out_path:str
         xtot_space = np.arange(x_min + 0.2 * x_min, x_max + 0.2 * x_max + 1)
     else:
         xtot_space = np.arange(min(x_range), max(x_range) + 1, 1)
+    5
     ytot_space = sys.potential.ene(xtot_space)
 
     tmax = len(y1data) - 1
@@ -56,6 +57,8 @@ def animation_trajectory(sys: system, x_range=None, title:str=None, out_path:str
 
         if (x_range != None):
             ax.set_xlim(x_range)
+        if (y_range != None):
+            ax.set_ylim(y_range)
         # return line,
 
     def data_gen(t=t0):
