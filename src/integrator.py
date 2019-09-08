@@ -31,7 +31,7 @@ class _integratorCls:
     _critInSpaceRange = lambda self,pos: self.spaceRange == None or (self.spaceRange != None and pos >= min(self.spaceRange) and pos <= max(self.spaceRange))
 
     def __init__(self):
-        raise NotImplementedError("This "+__class__+" class is not implemented")
+        raise NotImplementedError("This "+str(__class__)+" class is not implemented")
     
     def step(self, system:system):
         """
@@ -233,11 +233,13 @@ class positionVerletIntegrator(newtonianIntegrator):
         currentVelocity = system._currentVelocities
 
         #calculation:
-        newForces = system.potential.dhdpos(currentPosition)[0]  #Todo: make multi particles possible - use current forces!
-        velocity_new = [np.subtract(currentVelocity[dim], np.divide(newForces[dim], np.multiply(system.mass, self.dt))) for dim in range(system.nDim)] #TODO: check if velocities are correctly correctly read with their dims
-        new_velocity = velocity_new #0.5 * (currentVelocity + velocity_new)  #update velo
-        new_position = np.add(currentPosition, np.multiply(new_velocity , self.dt))
-
+        newForces = system.potential.dhdpos(currentPosition)  #Todo: make multi particles possible - use current forces!
+        if(system.nDim >1):
+            new_velocity = np.subtract(currentVelocity, np.divide(newForces, system.mass)) #TODO: check if velocities are correctly correctly read with their dims
+            new_position = np.add(currentPosition, np.multiply(new_velocity, self.dt))
+        else:
+            new_velocity = currentVelocity - (newForces / (system.mass))
+            new_position = currentPosition+ new_velocity * self.dt
 
         if(self.verbose):
             print("INTEGRATOR: current forces\t ", newForces)
@@ -249,12 +251,12 @@ class positionVerletIntegrator(newtonianIntegrator):
             print("\n")
         return new_position, new_velocity, newForces
 
-
 class leapFrogIntegrator(newtonianIntegrator):
     def __init__(self, dt=0.0005):
         self.dt = dt
 
     def step(self, system):
+        raise Exception("not implemented!")
         pass
 
 """
