@@ -6,78 +6,16 @@ This module shall be used to implement subclasses of Potential. This module cont
 import math
 import numpy as np
 import typing as t
-import numbers
+from numbers import Number
 import scipy.constants as const
 from collections.abc import Iterable, Sized
 
 from Ensembler.src.potentials import ND
-
-class _potential1DCls(ND._potentialNDCls):
-    '''
-        .. autoclass:: _potentialCls
-        This class is the
-    '''
-
-    nDim:int = 1
-
-    def __init__(self):
-        super().__init__(nDim=self.nDim)
-
-    @classmethod
-    def _check_positions_type_singlePos(cls, position: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        """
-            .. autofunction:: _check_positions_type
-            This function is parsing and checking all possible inputs to avoid misuse of the functions.
-        :param position: here the positions that shall be evaluated by the potential should be given.
-        :type position:  t.Union[t.Iterable[numbers.Number], numbers.Number]
-        :return: returns the evaluated potential values
-        :return type: t.List[float]
-        """
-        if (isinstance(position, numbers.Number)):
-            return np.float(position)
-        elif(isinstance(position, Sized) and len(position) == cls.nDim and isinstance(position[0], numbers.Number)):
-            return np.float(position[0])
-        else:
-            raise Exception("Input Type dimensionality does not fit to potential dimensionality! Input: " + str(position))
-
-    @classmethod
-    def _check_positions_type_multiPos(cls,
-                                        positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        """
-            .. autofunction:: _check_positions_type
-            This function is parsing and checking all possible inputs to avoid misuse of the functions.
-        :param positions: here the positions that shall be evaluated by the potential should be given.
-        :type positions:  t.Union[t.Iterable[numbers.Number], numbers.Number]
-        :return: returns the evaluated potential values
-        :return type: t.List[float]
-        """
-        if (isinstance(positions, numbers.Number)):  # single number
-            return np.array(positions, ndmin=1)
-        elif (isinstance(positions, Iterable)):
-            if (all([isinstance(x, numbers.Number) for x in positions])):  # list with numbers
-                return np.array(positions, ndmin=1)
-            elif ((type(positions) != type(None) and len(positions) == 1) and all(
-                    [isinstance(pos, numbers.Number) for pos in positions[0]])):
-                return np.array(positions[0], ndmin=1)
-            else:
-                raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=2 potential Dimensions 1")
-        else:
-            if (type(positions) == type(None)):
-                raise Exception("potential got None as position")
-            else:
-                raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
-                    len(positions)) + " potential Dimensions " + str(cls.nDim))
-
-    def _calculate_energies_singlePos(self, position: float)  -> float:
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
-
-    def _calculate_dhdpos_singlePos(self, position: float)  -> float:
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
+from Ensembler.src.potentials._baseclasses import _potential1DCls, _perturbedPotentialNDCls
 
 """
     SIMPLE POTENTIALS
 """
-
 class flat_well(_potential1DCls):
     '''
         .. autoclass:: flat well potential
@@ -121,7 +59,6 @@ class harmonicOsc(_potential1DCls):
         '''
 
         super().__init__()
-        self.nDim=1
         self.fc = fc
         self.x_shift = x_shift
         self.y_shift = y_shift
@@ -321,110 +258,18 @@ class doubleWellPot(_potential1DCls):
 """
     PERTURBED POTENTIALS
 """
-class _perturbedPotential1DCls(_potential1DCls):
-    """
-        .. autoclass:: perturbedPotentialCls
-    """
-    nStates = 2
-    lam:float
 
-    def __init__(self, lam: float = 0.0):
-        '''
-        Initializes a potential of the form V = 0.5 * (1 + alpha * lam) * fc * (pos - gamma * lam) ** 2
-        :param fc: force constant
-        :param alpha: perturbation parameter for width of harmonic oscillator
-        :param gamma: perturbation parameter for position of harmonic oscillator
-        '''
-        super().__init__()
-        self.lam = lam
-        self._calculate_dhdlam = self._calculate_dhdlam_multiPos
+class linCoupledHosc(_perturbedPotentialNDCls):
+    nStates:int = 2
+    nDim:int = 1
+    lam: float = 0.0
 
-    def _calculate_dhdlam(self, positions: t.List[float], lam: float = 1.0):
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
-
-    def set_lam(self, lam: float):
-        self.lam = lam
-
-    def dhdlam(self, positions: (t.List[float] or float)) -> (t.List[float] or float):
-        '''
-        calculates derivative with respect to lambda value
-        :param lam: alchemical parameter lambda
-        :param pos: position on 1D potential energy surface
-        :return: derivative dh/dlan
-        '''
-        positions = self._check_positions_type(positions)
-        return self._calculate_dhdlam(positions)
-
-    def _calculate_dhdlam_singlePos(self, positoin:float) -> (np.array or float):
-        raise Exception("Please implement this function!")
-
-    def _calculate_dhdlam_multiPos(self, positions: (t.List[float] or float)) -> (np.array or float):
-        return np.array(list(map(self._calculate_dhdlam_singlePos, positions)))
-
-    @classmethod
-    def _check_positions_type_singlePos(cls, position: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        """
-            .. autofunction:: _check_positions_type
-            This function is parsing and checking all possible inputs to avoid misuse of the functions.
-        :param position: here the positions that shall be evaluated by the potential should be given.
-        :type position:  t.Union[t.Iterable[numbers.Number], numbers.Number]
-        :return: returns the evaluated potential values
-        :return type: t.List[float]
-        """
-        if (isinstance(position, numbers.Number)):
-            return np.array([np.float(position) for x in range(cls.nStates)])
-        elif(isinstance(position, Sized)):
-            if(len(position) == cls.nStates and all([isinstance(p, numbers.Number) for p in position])):
-                return position
-            elif(isinstance(position, Sized) and len(position) == cls.nDim and isinstance(position[0], numbers.Number)):
-                return np.array([np.float(position[0]) for x in range(cls.nStates)])
-        else:
-            raise Exception("Input Type dimensionality does not fit to potential dimensionality! Input: " + str(position))
-
-    @classmethod
-    def _check_positions_type_multiPos(cls,
-                                        positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        """
-            .. autofunction:: _check_positions_type
-            This function is parsing and checking all possible inputs to avoid misuse of the functions.
-        :param positions: here the positions that shall be evaluated by the potential should be given.
-        :type positions:  t.Union[t.Iterable[numbers.Number], numbers.Number]
-        :return: returns the evaluated potential values
-        :return type: t.List[float]
-        """
-        if (isinstance(positions, numbers.Number)):  # single number
-            return np.array([positions for p in range(cls.nStates)], ndmin=1)
-        elif (isinstance(positions, Iterable)):
-            if (len(positions) != cls.nStates and all([isinstance(x, numbers.Number) for x in positions])):  # list with numbers
-                return np.array(positions, ndmin=1)
-            elif (len(positions) != cls.nStates and all([isinstance(x, numbers.Number) for x in positions])):  # list with numbers
-                return np.array([positions  for p in range(cls.nStates)], ndmin=1)
-            else:
-                raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=2 potential Dimensions 1")
-        else:
-            if (type(positions) == type(None)):
-                raise Exception("potential got None as position")
-            else:
-                raise Exception("list dimensionality does not fit to potential dimensionality! len(list)=" + str(
-                    len(positions)) + " potential Dimensions " + str(cls.nDim))
-
-    def _calculate_energies_singlePos(self, position: float)  -> float:
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
-
-    def _calculate_dhdpos_singlePos(self, position: float)  -> float:
-        raise NotImplementedError("Function " + __name__ + " was not implemented for class " + str(__class__) + "")
-
-class linCoupledHosc(_perturbedPotential1DCls):
-    nStates = 2
-
-    def __init__(self, ha:_potential1DCls=harmonicOsc(fc=1.0, x_shift=0.0), hb:_potential1DCls=harmonicOsc(fc=11.0, x_shift=0.0), lam:float=0):
-        super().__init__()
+    def __init__(self, ha: _potential1DCls =harmonicOsc(fc=1.0, x_shift=0.0),
+                       hb: _potential1DCls =harmonicOsc(fc=11.0, x_shift=0.0), lam:float = 0):
+        super().__init__(state_potentials=[ha, hb], lam=lam)
 
         self.ha = ha
         self.hb = hb
-        self.ha._set_singlePos_mode()
-        self.hb._set_singlePos_mode()
-        self.lam = lam
         self.couple_H = lambda Va, Vb: (1.0 - self.lam) * Va + self.lam * Vb
 
     def _calculate_energies_singlePos(self, position: float) -> float:
@@ -437,19 +282,19 @@ class linCoupledHosc(_perturbedPotential1DCls):
         return float(self.hb.ene(position[0])) - float(self.ha.ene(position[1]))
 
 
-class expCoupledHosc(_perturbedPotential1DCls):
+class expCoupledHosc(_perturbedPotentialNDCls):
     nStates = 2
 
     def __init__(self, ha=harmonicOsc(fc=1.0, x_shift=0.0), hb=harmonicOsc(fc=11.0, x_shift=0.0), s=1.0, temp=300.0,
                  lam: float = 0.0):
-        super().__init__()
+        super().__init__(state_potentials=[ha, hb], lam=lam)
 
         self.ha = ha
         self.hb = hb
         self.s = s
         self.beta = const.gas_constant / 1000.0 * temp
-        self.lam = lam
 
+        #Potential Functions
         self.couple_H = lambda Va, Vb: -1.0 / (self.beta * self.s) * np.log(
             self.lam * np.exp(-self.beta * self.s * Vb) + (1.0 - self.lam) * np.exp(-self.beta * self.s * Va))
 
@@ -462,45 +307,46 @@ class expCoupledHosc(_perturbedPotential1DCls):
             -self.beta * self.s * Va))
 
     def _calculate_energies_singlePos(self, position: float) -> float:
-        return self.couple_H(float(self.ha.ene(position)), float(self.hb.ene(position)))
+        return self.couple_H(float(self.ha.ene(position[0])), float(self.hb.ene(position[1])))
 
     def _calculate_dhdpos_singlePos(self, position: float) -> float:
-        return self.couple_H_dhdpos(float(self.ha.dhdpos(position)), float(self.hb.dhdpos(position)))
+        return self.couple_H_dhdpos(float(self.ha.dhdpos(position[0])), float(self.hb.dhdpos(position[1])))
 
     def _calculate_dhdlam_singlePos(self, position:float) -> (np.array or float):
-        return self.couple_H_dhdlam(float(self.ha.ene(position)), float(self.hb.ene(position)))
+        return self.couple_H_dhdlam(float(self.ha.ene(position[0])), float(self.hb.ene(position[1])))
 
 
-class pertHarmonicOsc(_perturbedPotential1DCls):
+class pertHarmonicOsc(_perturbedPotentialNDCls):
     """
         .. autoclass:: pertHarmonixsOsc1D
     """
     name = "perturbed Harmonic Oscilator"
-    nStates = 2
-
+    nStates = 1
+    nDim=1
     def __init__(self, fc=1.0, alpha=10.0, gamma=0.0, lam: float = 0.0):
         '''
         Initializes a potential of the form V = 0.5 * (1 + alpha * lam) * fc * (pos - gamma * lam) ** 2
         :param fc: force constant
         :param alpha: perturbation parameter for width of harmonic oscillator
         :param gamma: perturbation parameter for position of harmonic oscillator
-        #TODO: reshap this implementation for using harmonic pot 1D
         '''
-        super().__init__()
-
-        self.fc = fc
+        super().__init__([self])
+        self.fc=fc
         self.alpha = alpha
         self.gamma = gamma
         self.lam = lam
 
     def _calculate_energies_singlePos(self, position: float) -> float:
-        return 0.5 * (1.0 + self.alpha * self.lam) * self.fc * (position - self.gamma * self.lam) ** 2
+        return float(0.5 * (1.0 + self.alpha * self.lam) * self.fc * (position - self.gamma * self.lam) ** 2)
 
     def _calculate_dhdpos_singlePos(self, position: float) -> float:
-        return (1.0 + self.alpha * self.lam) * self.fc * (position - self.gamma * self.lam)
+        return float((1.0 + self.alpha * self.lam) * self.fc * (position - self.gamma * self.lam))
 
-    def _calculate_dhdlam_singlePos(self, Va_t:float, Vb_t:float) -> (np.array or float):
-        return False
+    def _calculate_dhdlam_singlePos(self, position:Number) -> (np.array or Number):
+        return float(0.5*self.alpha*(position-self.gamma*self.lam)*(position*self.alpha+self.gamma*(-3*self.lam*self.alpha-2)))
+
+    def set_lam(self, lam: Number):
+        self.lam = lam
 
 
 class envelopedPotential(ND.envelopedPotential):
@@ -523,10 +369,10 @@ class envelopedPotential(ND.envelopedPotential):
         super().__init__(V_is=V_is, s=s, Eoff_i=Eoff_i)
     # each state gets a position list
 
-    def _check_positions_type(self, positions: (numbers.Number or t.Iterable[float] or t.Iterable[t.Iterable[float]])) -> np.array:
-        if (isinstance(positions, numbers.Number)):
+    def _check_positions_type(self, positions: (Number or t.Iterable[float] or t.Iterable[t.Iterable[float]])) -> np.array:
+        if (isinstance(positions, Number)):
             return np.array([positions for state in range(self.nStates)], ndmin=1)
-        elif(isinstance(positions, Iterable) and all([isinstance(position, numbers.Number) for position in positions])):
+        elif(isinstance(positions, Iterable) and all([isinstance(position, Number) for position in positions])):
             return np.array([positions for state in range(self.nStates)], ndmin=1)
         elif (isinstance(positions, Iterable) and len(positions) == len(self.V_is) and all([isinstance(pos, Iterable) for pos in positions])):
             return np.array([positions for state in range(self.nStates)], ndmin=2)

@@ -1,46 +1,14 @@
-
-
 """
 Module: Potential
     This module shall be used to implement subclasses of Potential. This module contains all available potentials.
 """
 
 import numpy as np
-import numbers
 import math
-import typing as t
+from numbers import Number
+from typing import Iterable, List, Sized
 
-from Ensembler.src.potentials import ND
-
-class _potential2DCls(ND._potentialNDCls):
-    '''
-    potential base class
-    '''
-    nDim:int =2
-
-    def __init__(self):
-        super().__init__()
-        self.nDim:int =2
-
-    @classmethod
-    def _check_positions_type_singlePos(cls, position: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        positions = super()._check_positions_type_singlePos(position=position)
-        if(all([len(pos) == cls.nDim for pos in positions])):
-            return positions
-        else:
-            raise Exception("Dimensionality is not correct for positions! "+str(positions))
-
-    @classmethod
-    def _check_positions_type_multiPos(cls, positions: t.Union[t.Iterable[numbers.Number], numbers.Number]) -> np.array:
-        positions = super()._check_positions_type_multiPos(positions=positions)
-
-        #dim check
-        if(len(positions) == 1 and all([ isinstance(pos, t.Iterable) and len(pos) == cls.nDim  and all([isinstance(x, numbers.Number) for x in pos]) for pos in positions[0]])):
-            return positions[0]
-        elif(all([len(pos) == cls.nDim for pos in positions])):
-            return positions
-        else:
-            raise Exception("Dimensionality is not correct for positions! "+str(positions))
+from Ensembler.src.potentials._baseclasses import _potential2DCls
 
 class wavePotential(_potential2DCls):
 
@@ -72,12 +40,12 @@ class wavePotential(_potential2DCls):
         self.y_offset = y_offset
 
         if(radians):
-            if(isinstance(phase_shift, numbers.Number)):
+            if(isinstance(phase_shift, Number)):
                 self.phase_shift = [phase_shift, phase_shift]
             else:
                 self.phase_shift = phase_shift
         else:
-            if(isinstance(phase_shift, numbers.Number)):
+            if(isinstance(phase_shift, Number)):
                 self.phase_shift = np.deg2rad([phase_shift, phase_shift])
             else:
                 self.phase_shift = np.deg2rad(phase_shift)
@@ -106,9 +74,11 @@ class wavePotential(_potential2DCls):
         self.radians = not degrees
         if (degrees):
             if (self._singlePos_mode):
+                self._check_positions_type = self._check_positions_type_singlePos
                 self._calculate_energies = lambda positions: self._calculate_energies_singlePos(np.deg2rad(positions))
                 self._calculate_dhdpos = lambda positions: self._calculate_dhdpos_singlePos(np.deg2rad(positions))
             else:
+                self._check_positions_type = self._check_positions_type_multiPos
                 self._calculate_energies = lambda positions: self._calculate_energies_multiPos(np.deg2rad(positions))
                 self._calculate_dhdpos = lambda positions: self._calculate_dhdpos_multiPos(np.deg2rad(positions))
         else:
@@ -118,14 +88,15 @@ class wavePotential(_potential2DCls):
         self.radians = radians
         if (radians):
             if(self._singlePos_mode):
+                self._check_positions_type = self._check_positions_type_singlePos
                 self._calculate_energies  = self._calculate_energies_singlePos
                 self._calculate_dhdpos = self._calculate_dhdpos_singlePos
             else:
+                self._check_positions_type = self._check_positions_type_multiPos
                 self._calculate_energies  = self._calculate_energies_multiPos
                 self._calculate_dhdpos = self._calculate_dhdpos_multiPos
         else:
             self.set_degrees(degrees=not radians)
-
 
 class torsionPotential(_potential2DCls):
     '''
@@ -134,21 +105,28 @@ class torsionPotential(_potential2DCls):
     name:str = "Torsion Potential"
 
     phase:float=1.0
-    wave_potentials:t.List[wavePotential]=[]
+    wave_potentials:List[wavePotential]=[]
 
-    def __init__(self, wave_potentials:t.List[wavePotential]):
+    def __init__(self, wave_potentials:List[wavePotential]):
         '''
         initializes torsions Potential
         '''
         super().__init__()
-        if(type(wave_potentials) == list):
-            self.wave_potentials=wave_potentials
-        else:
-            self.wave_potentials=[wave_potentials]
 
-        if(len(self.wave_potentials)>1):
-            self._calculate_energies = lambda positions: np.add(*map(lambda x: np.array(x.ene(positions)), self.wave_potentials))
-            self._caclulcate_dhdpos = lambda positions: np.add(*map(lambda x: np.array(x.dhdpos(positions)), self.wave_potentials))
-        elif(len(self.wave_potentials)==1):
-            self._calculate_energies = lambda positions: np.array(self.wave_potentials[0].ene(positions))
-            self._caclulcate_dhdpos = lambda positions: np.array(self.wave_potentials[0].dhdpos(positions))
+        if(isinstance(wave_potentials, Sized) and len(wave_potentials) > 1):
+            self.wave_potentials = wave_potentials
+        else:
+            raise Exception("Torsion Potential needs at least two Wave functions. Otherewise please use wave Potentials.")
+
+    def _calculate_energies_multiPos(self, positions: Iterable[Iterable[Number]]) ->  np.array:
+        return np.add(*map(lambda x: np.array(x.ene(positions)), self.wave_potentials))
+
+    def _calculate_energies_singlePos(self, position: Iterable[float]) -> np.array:
+        return np.add(*map(lambda x: np.array(x.ene(position)), self.wave_potentials))
+
+    def _calculate_dhdpos_multiPos(self, positions: Iterable[Iterable[float]]) ->  np.array:
+        return  np.add(*map(lambda x: np.array(x.dhdpos(positions)), self.wave_potentials))
+
+    def _calculate_dhdpos_singlePos(self, position:Iterable[float]) -> np.array:
+        return  np.add(*map(lambda x: np.array(x.dhdpos(position)), self.wave_potentials))
+

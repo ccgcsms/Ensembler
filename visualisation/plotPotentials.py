@@ -1,11 +1,11 @@
-from matplotlib import pyplot as plt
-from matplotlib import colorbar
-
 import os, sys
+import numpy as np
+from matplotlib import pyplot as plt, colorbar
+
 sys.path.append(os.path.dirname(__file__)+"/..")
 
 from Ensembler.src.potentials import OneD as pot, ND as nDPot
-import numpy as np
+from Ensembler.src.potentials._baseclasses import _potential1DCls, _perturbedPotentialNDCls
 
 #UTIL FUNCTIONS
 def significant_decimals(s:float)->float:
@@ -20,7 +20,7 @@ def significant_decimals(s:float)->float:
     else:
         return s
 
-def plot_1DPotential(potential:pot._potential1DCls, positions:list,
+def plot_1DPotential(potential: _potential1DCls, positions:list,
                      x_range=None, y_range=None, title:str=None, ax=None):
     # generat Data
     energies = potential.ene(positions=positions)
@@ -47,7 +47,7 @@ def plot_1DPotential(potential:pot._potential1DCls, positions:list,
         return ax
     pass
 
-def plot_1DPotential_dhdpos(potential:pot._potential1DCls, positions:list,
+def plot_1DPotential_dhdpos(potential: _potential1DCls, positions:list,
                             x_range=None, y_range=None, title:str=None, ax=None):
     # generat Data
     energies = potential.dhdpos(positions=positions)
@@ -75,7 +75,7 @@ def plot_1DPotential_dhdpos(potential:pot._potential1DCls, positions:list,
     pass
 
 
-def plot_1DPotential_Term(potential: pot._potential1DCls, positions: list,
+def plot_1DPotential_Term(potential:_potential1DCls, positions: list,
                           x_range=None, y_range=None, title: str = None, ax=None):
     fig, axes = plt.subplots(nrows=1, ncols=2)
     plot_1DPotential(potential=potential, positions=positions, ax=axes[0], x_range=x_range, y_range=y_range, title="Pot")
@@ -84,7 +84,7 @@ def plot_1DPotential_Term(potential: pot._potential1DCls, positions: list,
     fig.suptitle(title) if(title!=None) else fig.suptitle("Potential "+str(potential.name))
     return fig, axes
 
-def plot_1DPotential_Termoverlay(potential:pot._potential1DCls, positions:list,
+def plot_1DPotential_Termoverlay(potential: _potential1DCls, positions:list,
                                  x_range=None, y_range=None, title: str = None, ax=None):
     #generate dat
     energies = potential.ene(positions=positions)
@@ -113,7 +113,7 @@ def plot_1DPotential_Termoverlay(potential:pot._potential1DCls, positions:list,
     else:
         return ax
 
-def plot_2DEnergy_landscape(potential1:pot._potential1DCls, potential2:pot._potential1DCls, positions1:list, positions2:list=None,
+def plot_2DEnergy_landscape(potential1: _potential1DCls, potential2: _potential1DCls, positions1:list, positions2:list=None,
                             x_range=None, y_range=None, z_range=None, title:str=None, colbar:bool=False, ax=None, cmap:str="inferno"):
     #generat Data
     energy_map = []
@@ -123,8 +123,8 @@ def plot_2DEnergy_landscape(potential1:pot._potential1DCls, potential2:pot._pote
         positions2 = positions1
 
     for pos in positions2:
-        Va:float = potential2.ene(pos)[0]
-        Vb:list = potential1.ene(positions1)
+        Va = potential2.ene(pos)[0]
+        Vb = potential1.ene(positions1)
         Vtot = list(map(lambda x: x+Va, Vb))
         energy_map.append(Vtot)
 
@@ -162,7 +162,7 @@ def plot_2DEnergy_landscape(potential1:pot._potential1DCls, potential2:pot._pote
     return fig, ax, surf
 
 
-def plot_2perturbedEnergy_landscape(potential:pot._perturbedPotential1DCls, positions:list, lambdas:list,
+def plot_2perturbedEnergy_landscape(potential:_perturbedPotentialNDCls, positions:list, lambdas:list,
                                     x_range=None, lam_range=None, title:str=None, colbar:bool=False, ax=None):
 
     energy_map_lin = []
@@ -329,6 +329,7 @@ def plot_envelopedPotential_system(eds_potential:nDPot.envelopedPotential, posit
 
 def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotential, positions:list, s_value:float=None, Eoffi:list=None,
                                           title:str=None, out_path:str=None, V_max:float=600, V_min:float=None):
+
     if(len(eds_potential.V_is)>2):
         raise IOError(__name__+" can only be used with two states in the potential!")
 
@@ -349,8 +350,8 @@ def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotentia
     min_e = 0
 
     for x in positions:
-        row = eds_potential.ene([[[x for i in positions]], [positions]])
-        row_cut = list(map(lambda x:  V_max if(V_max != None and x > V_max) else x, row))
+        row = eds_potential.ene(list(map(lambda y:[[x], [y]], list(positions))))
+        row_cut = list(map(lambda x:  V_max if(V_max != None and float(x) > V_max) else float(x), row))
         energy_map.append(row_cut)
         if(min(row)< min_e):
             min_e=min(row)
@@ -377,12 +378,12 @@ def plot_envelopedPotential_2State_System(eds_potential: nDPot.envelopedPotentia
     #plot phase space surface
     ax = axes[-1]
     surf = ax.imshow(energy_map, cmap="inferno", interpolation="nearest",
-                     origin='center', extent=[ min(positions), max(positions), min(positions), max(positions)],
+                    origin='center', extent=[min(positions), max(positions), min(positions), max(positions)],
                      vmax=V_max, vmin=V_min)
     ax.set_xlabel("$r_{"+labels[0]+"}$")
     ax.set_ylabel("$r_{"+labels[1]+"}$")
     ax.set_title("complete phaseSpace of $state_R$")
-    fig.colorbar(surf, aspect=5, label='Energy/kJ')
+    #fig.colorbar(surf, aspect=5, label='Energy/kJ')
 
     ##optionals
     if(title):    fig.suptitle(title)
@@ -407,11 +408,12 @@ def envPot_diffS_2stateMap_compare(eds_potential: pot.envelopedPotential, s_valu
         min_e = 0
         energy_map = []
         for x in positions:
-            row = eds_potential.ene([[[x for i in positions]], [positions]])
-            row_cut = list(map(lambda x: V_max if (V_max != None and x > V_max) else x, row))
+            row = eds_potential.ene(list(map(lambda y: [[x], [y]], list(positions))))
+            row_cut = list(map(lambda x: V_max if (V_max != None and float(x) > V_max) else float(x), row))
             energy_map.append(row_cut)
             if (min(row) < min_e):
                 min_e = min(row)
+
         if (V_min == None and first):
             V_min = min_e
             first = False

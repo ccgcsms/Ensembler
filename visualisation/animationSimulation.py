@@ -1,7 +1,7 @@
-import os
 import numpy as np
-from matplotlib import animation
-from matplotlib import pyplot as plt
+from typing import Iterable
+from numbers import Number
+from matplotlib import animation, pyplot as plt
 
 import os, sys
 sys.path.append(os.path.dirname(__file__)+"/..")
@@ -70,7 +70,7 @@ def animation_trajectory(sys: system, x_range=None, y_range=None, title:str=None
         # update the data
         x, V = data
 
-        if (x == x1data[-1]):  # last step of traj
+        if (x.all(x1data[-1])):  # last step of traj
             curr_p.set_data([], [])
             end_p.set_data(x1data[-1], y1data[-1])
         else:
@@ -106,14 +106,14 @@ def animation_EDS_trajectory(sys: system, x_range=None, title:str=None, out_path
     x1data = [state.position for state in sys.trajectory]
     y1data = [state.totPotEnergy for state in sys.trajectory]
     #shift = [state.dhdpos for state in sys.trajectory]
-    x_max = max(x1data)
-    x_min = min(x1data)
+    x_max = max(x1data[0])
+    x_min = min(x1data[0])
     active_dots = 20
 
     if (x_range == None):
-        xtot_space = np.array(np.arange(x_min + 0.2 * x_min, x_max + 0.2 * x_max + 1), ndmin=2)
+        xtot_space = np.array(np.arange(x_min + 0.2 * x_min, x_max + 0.2 * x_max + 1), ndmin=1)
     else:
-        xtot_space = np.array(np.linspace(min(x_range), max(x_range) + 1, tot_pot_resolution), ndmin=2)
+        xtot_space = np.array(np.linspace(min(x_range), max(x_range) + 1, tot_pot_resolution), ndmin=1)
 
     tmax = len(y1data) - 1-step_size
     t0 = 0
@@ -159,12 +159,15 @@ def animation_EDS_trajectory(sys: system, x_range=None, title:str=None, out_path
         # update the data
         x, V = data
 
-        if (x == x1data[-1]):  # last step of traj
+        if (type(x) == type(x1data[-1])==list and all([xi == x1i for xi, x1i in zip(x, x1data[-1])]) ):  # last step of traj
+            curr_p.set_data([], [])
+            end_p.set_data(x1data[-1], y1data[-1])
+        elif (type(x) == type(x1data[-1])==Number and x==x1data[-1] ):  # last step of traj
             curr_p.set_data([], [])
             end_p.set_data(x1data[-1], y1data[-1])
         else:
             curr_p.set_data([x], [V])
-            xdata.append(x)
+            xdata.append(x) if(not isinstance(x, Iterable)) else xdata.append(x[0])
             ydata.append(V)
 
             if (len(xdata) > active_dots+10):
