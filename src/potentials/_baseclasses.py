@@ -26,6 +26,13 @@ class _potentialNDCls:
     def __name__(self)->str:
         return str(self.name)
 
+    def __str__(self):
+        msg = self.__name__()+"\n"
+        msg+= "\tStates: "+str(self.nStates)+"\n"
+        msg+= "\tDimensions: "+str(self.nDim)+"\n"
+        msg += "\n"
+        return msg
+
     """
         public
     """
@@ -321,7 +328,6 @@ class _potentialNDMultiState(_potentialNDCls):
         :return type: Iterable[Number]
         """
         # array
-        print(position)
         if (isinstance(position, Number)):
             if (self.nDim == 1):
                 return np.array([position for state in range(self.nStates)])

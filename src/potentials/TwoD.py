@@ -2,11 +2,12 @@
 Module: Potential
     This module shall be used to implement subclasses of Potential. This module contains all available potentials.
 """
+import os
 
 import numpy as np
 import math
 from numbers import Number
-from typing import Iterable, List, Sized
+from typing import Iterable, List, Sized, Union
 
 from Ensembler.src.potentials._baseclasses import _potential2DCls
 
@@ -130,3 +131,63 @@ class torsionPotential(_potential2DCls):
     def _calculate_dhdpos_singlePos(self, position:Iterable[float]) -> np.array:
         return  np.add(*map(lambda x: np.array(x.dhdpos(position)), self.wave_potentials))
 
+
+class swissPotential(_potential2DCls):
+    '''
+        .. autoclass:: Torsion Potential
+    '''
+    name:str = "SwissPotential"
+    look_up_table:np.array
+    inverse:bool=False
+
+    def __init__(self, inverse:bool=False):
+        '''
+        initializes torsions Potential
+        '''
+        super().__init__()
+
+        #loading speedup!
+        if(os.path.exists(os.path.dirname(__file__) + "/look_up_tables/Switzerland_20m/DTM_Switzerland_20m.npy")):
+            self.look_up_table = np.load(  open(os.path.dirname(__file__) + "/look_up_tables/Switzerland_20m/DTM_Switzerland_20m.npy", "rb"))
+        else:   #load intial from tif
+            from PIL import Image
+            Image.MAX_IMAGE_PIXELS = None
+
+            self.look_up_table = np.array(Image.open(os.path.dirname(__file__) + "/look_up_tables/Switzerland_20m/DTM_Switzerland_20m.tif"))
+            self.look_up_table = np.rot90(np.rot90(self.look_up_table))
+            np.putmask(self.look_up_table, self.look_up_table == -32767, 32767)
+            np.save( arr=self.look_up_table, file=os.path.dirname(__file__) + "/look_up_tables/Switzerland_20m/DTM_Switzerland_20m.npy")
+        self.shape = self.look_up_table.shape
+        self.set_Inverse(inverse)
+
+    def set_Inverse(self, inverse:bool):
+        if(inverse == self.inverse):
+            pass
+        else:
+            self.inverse = inverse
+            self.look_up_table = np.multiply(-1, self.look_up_table)
+            np.putmask(self.look_up_table, self.look_up_table == -32767, 32767)
+
+    def _calculate_energies_singlePos(self, position: Iterable[Number]) -> np.array:
+        if(position[0]% 1 != 0 or position[0]% 1 != 0):
+            #todo: interpolate!
+            return self.look_up_table[int(round(position[0])), int(round(position[1]))]
+        else:
+            return self.look_up_table[position[0], position[1]]
+
+    def _calculate_dhdpos_singlePos(self, position: Union[Iterable[Number], Number]) -> Union[np.array, Number]:
+        self.look = lambda x,y: self.look_up_table(x,y)
+        x = position[0]
+        y = position[1]
+        scan = [-1,0,1]
+        for dy in scan:
+            dhdpos_dim_sum = ((self.look(x, y)-self.look(x-1, y+dy))+
+                          (self.look(x+1, y+dy)-self.look(x, y)))
+        dhdpos_x = dhdpos_dim_sum/(len(scan)*2)
+
+        for dx in scan:
+            dhdpos_dim_sum = ((self.look(x, y)-self.look(x+dx, y-1))+
+                          (self.look(x+dx, y+1)-self.look(x, y)))
+        dhdpos_y = dhdpos_dim_sum/(len(scan)*2)
+
+        return (dhdpos_x, dhdpos_y)

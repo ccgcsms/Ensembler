@@ -135,6 +135,7 @@ class envelopedPotential(_potentialNDCls):
     """
     .. autoclass:: envelopedPotential
     """
+    name = "Enveloping potential"
     V_is:Iterable[_potentialNDCls] = None
     E_is:Iterable[float] = None
     nStates:int = None
@@ -157,8 +158,8 @@ class envelopedPotential(_potentialNDCls):
 
         #check State number
         self.nStates = len(V_is)
-        if (self.nStates < 2):
-            raise IOError("It does not make sense enveloping less than two potentials!")
+        #if (self.nStates < 2):
+        #    raise IOError("It does not make sense enveloping less than two potentials!")
         if (Eoff_i == None):
             Eoff_i = [0.0 for state in range(len(V_is))]
         elif (len(Eoff_i) != self.nStates):
@@ -174,7 +175,12 @@ class envelopedPotential(_potentialNDCls):
         self.s = s
         self.Eoff_i = Eoff_i
 
+    def __str__(self) ->str:
+        msg = super().__str__()
+        msg += "\tEnveloped Potentials: \n\t\t"+"\n\t\t".join(*[str(p).split("\n") for p in self.V_is])+"\n"
+        return msg
     def _check_positions_type_singlePos(self, position: Union[Iterable[numbers.Number], numbers.Number]) -> np.array:
+        print(position)
         #print("hmmm", position)
         if (isinstance(position, numbers.Number)):
                 return np.array([[position] for state in range(self.nStates)], ndmin=2)
@@ -215,11 +221,14 @@ class envelopedPotential(_potentialNDCls):
         #print("NDSi", position)
 
         partA = np.multiply(-self.s, np.subtract(self.V_is[0].ene(position[0]), self.Eoff_i[0]))
-        partB = np.multiply(-self.s, np.subtract(self.V_is[1].ene(position[1]), self.Eoff_i[1]))
+        if(len(self.Eoff_i) >1):
+            partB = np.multiply(-self.s, np.subtract(self.V_is[1].ene(position[1]), self.Eoff_i[1]))
+            sum_prefactors = max(partA, partB) + np.log(1 + np.exp(min(partA, partB) - max(partA, partB)))
+        else:
+            sum_prefactors = partA + np.log(1 + np.exp(partA - partA))
         #print("partA", partA)
         #print("partB", partB)
 
-        sum_prefactors = max(partA, partB) + np.log(1 + np.exp(min(partA, partB) - max(partA, partB)))
 
         # more than two states!
         for state in range(2, self.nStates):

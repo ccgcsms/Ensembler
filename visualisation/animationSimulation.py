@@ -70,7 +70,7 @@ def animation_trajectory(sys: system, x_range=None, y_range=None, title:str=None
         # update the data
         x, V = data
 
-        if (x.all(x1data[-1])):  # last step of traj
+        if ( x == x1data[-1]): #x.all(x1data[-1])):  # last step of traj
             curr_p.set_data([], [])
             end_p.set_data(x1data[-1], y1data[-1])
         else:

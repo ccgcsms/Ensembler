@@ -112,7 +112,7 @@ class monteCarloIntegrator(_integratorCls):
         else:
             shift = np.abs(np.random.rand(nDim))
 
-        #Is the step shift in the allowed area?
+        #Is the step shift in the allowed area? #Todo: fix min and max for mutliDimensional
         if(self.maxStepSize != None and shift > self.maxStepSize):#is there a maximal step size?
             self.posShift = np.multiply(sign, self.maxStepSize)
         elif(self.minStepSize != None and shift < self.minStepSize):
