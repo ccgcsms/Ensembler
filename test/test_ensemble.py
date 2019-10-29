@@ -22,15 +22,21 @@ class test_ReplicaExchangeCls(unittest.TestCase):
 
     def test_init_1DREnsemble(self):
         from Ensembler.src import ensemble
-        ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
+        exchange_dimensions = {"temperature": range(288, 310)}
+        ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
     def test_init_2DREnsemble(self):
         from Ensembler.src import ensemble
-        ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature", "mass"], parameter_Ranges=[range(288, 310), range(1,10)])
+        exchange_dimensions = {"temperature": range(288, 310),
+                               "mass": range(1,10)}
+
+        ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
     def test_run_1DREnsemble(self):
         from Ensembler.src import ensemble
-        group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
+        exchange_dimensions = {"temperature": range(288, 310)}
+
+        group = ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
         group.run()
 
     def test_getTraj_1DREnsemble(self):
@@ -38,7 +44,9 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         nsteps = 100
         group = None
         from Ensembler.src import ensemble
-        self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
+        exchange_dimensions = {"temperature": range(288, 310)}
+
+        self.group = ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
         self.group.nSteps_between_trials = nsteps
         self.group.run()
         trajectories = self.group.get_trajectories()
@@ -54,7 +62,9 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         replicas =22
         nsteps = 100
         from Ensembler.src import ensemble
-        self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=range(288, 310))
+        exchange_dimensions = {"temperature": range(288, 310)}
+
+        self.group = ensemble.ReplicaExchange(system=self.sys,exchange_dimensions=exchange_dimensions)
         self.group.nSteps_between_trials = nsteps
         self.group.run()
         totPots = self.group.get_Total_Energy()
@@ -65,10 +75,10 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         self.assertEqual(len(totPots), replicas, msg="not enough trajectories were retrieved!")
 
     def test_setPositionsList_1DREnsemble(self):
-        param_range = range(288, 310)
-        replicas =len(param_range)
+        exchange_dimensions = {"temperature": range(288, 310)}
+        replicas =len(exchange_dimensions["temperature"])
         expected_pos= range(replicas)
-        self.group = ensemble.ReplicaExchange(system=self.sys, parameter_Names=["temperature"], parameter_Ranges=param_range)
+        self.group = ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
         initial_positions = sorted([self.group.replicas[replica]._currentPosition for replica in self.group.replicas])
         self.group.setReplicasPositions(expected_pos)
@@ -111,8 +121,11 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         nsteps = 100
         T_range=range(288, 310)
         self.group = ensemble.TemperatureReplicaExchange(system=sys, temperature_Range=T_range)
+        print(self.group.get_Total_Energy())
         self.group.nSteps_between_trials = nsteps
         self.group.run()
+        print(self.group.get_Total_Energy())
+
 
     def test_exchange_all(self):
         integrator = integrators.monteCarloIntegrator()
@@ -154,7 +167,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         potential =pot.OneD.harmonicOsc()
         sys = system.system(potential=potential, integrator=integrator)
 
-        T_range = range(1, 500, 200)
+        T_range = [1, 200, 500]
         nReplicas = len(T_range)
         positions = [float(x)*100 for x in range(nReplicas)]
         velocities = list([float(1) for x in range(nReplicas)])
@@ -182,6 +195,19 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         self.assertEqual(nReplicas//2, len(all_exchanges), msg="length of all exchanges is not correct!")
         #self.assertFalse(all(list(all_exchanges.values())), msg="length of all exchanges is not correct!")
 
+    def test_simulate(self):
+        integrator = integrators.monteCarloIntegrator()
+        potential =pot.OneD.harmonicOsc()
+        sys = system.system(potential=potential, integrator=integrator)
 
+        replicas =22
+        nsteps = 100
+        T_range=range(288, 310)
+        self.group = ensemble.TemperatureReplicaExchange(system=sys, temperature_Range=T_range)
+        print(self.group.get_Total_Energy())
+        self.group.nSteps_between_trials = nsteps
+        self.group.simulate(5)
+        print(self.group.get_Total_Energy())
+        print("Exchanges: ", self.group.exchange_information)
 if __name__ == '__main__':
     unittest.main()
