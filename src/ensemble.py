@@ -25,8 +25,8 @@ class ReplicaExchange:
     replica_graph_dimensions:int
 
     ##Exchange params/io
-    exchange_information: pd.DataFrame = pd.DataFrame(columns=["nExchange", "uniqueReplicaID", "replicaI", "exchangeCoordinateI", "TotEI",
-                                                                "replicaJ","exchangeCoordinateJ", "TotEJ", "doExchange"])
+    exchange_information: pd.DataFrame = None#pd.DataFrame(columns=["nExchange", "uniqueReplicaID", "replicaI", "exchangeCoordinateI", "TotEI",
+    #                                                                "replicaJ","exchangeCoordinateJ", "TotEJ", "doExchange"])
     ##simulation Params
     nSteps_between_trials = 100
 
@@ -56,8 +56,8 @@ class ReplicaExchange:
         self.system = system
 
         #exchange finfo:
-        #self.exchange_information = pd.DataFrame(columns=["nExchange", "uniqueReplicaID","replicaI", "exchangeCoordinateI", "TotEI",
-        #                                                  "replicaJ","exchangeCoordinateJ", "TotEJ", "doExchange"])
+        self.exchange_information = pd.DataFrame(columns=["nExchange", "uniqueReplicaID","replicaI", "exchangeCoordinateI", "TotEI",
+                                                          "replicaJ","exchangeCoordinateJ", "TotEJ", "doExchange"])
 
         if(steps_between_trials != None):
             self.nSteps_between_trials = steps_between_trials
@@ -242,10 +242,10 @@ class ReplicaExchange:
         return {coord:replica.trajectory for coord, replica in self.replicas.items()}
 
     def get_Total_Energy(self)->Dict[Tuple, float]:
-        #print("T_check: ", [ replica.temperature for coord, replica in self.replicas.items()])
-        #print("T_currentPos: ", [ replica._currentPosition for coord, replica in self.replicas.items()])
-        #print("T_CurrentE: ", [ replica.getTotPot() for coord, replica in self.replicas.items()])
-        #print("T_rep: ", [ replica for coord, replica in self.replicas.items()])
+        ##print("T_check: ", [ replica.temperature for coord, replica in self.replicas.items()])
+        ##print("T_currentPos: ", [ replica._currentPosition for coord, replica in self.replicas.items()])
+        ##print("T_CurrentE: ", [ replica.getTotPot() for coord, replica in self.replicas.items()])
+        ##print("T_rep: ", [ replica for coord, replica in self.replicas.items()])
 
         [replica.updateEne() for coord, replica in self.replicas.items()]
         return {coord:replica.getTotEnergy() for coord, replica in self.replicas.items()}
@@ -317,8 +317,8 @@ class TemperatureReplicaExchange(ReplicaExchange):
         for partner1, partner2 in zip(original_T[self.exchange_offset::2], original_T[1+self.exchange_offset::2]):
             originalEnergies = np.add(original_totPots.get(partner1), original_totPots.get(partner2))
             swapEnergies = np.add(swapped_totPots.get(partner1), swapped_totPots.get(partner2))
-            print("partners: "+str(partner1)+"/"+str(partner2)+" \t originalEnergies "+str(originalEnergies)+" / Swap "+str(swapEnergies))
-            print("randomness part: "+str(self._defaultRandomness(originalEnergies, swapEnergies)))
+            #print("partners: "+str(partner1)+"/"+str(partner2)+" \t originalEnergies "+str(originalEnergies)+" / Swap "+str(swapEnergies))
+            #print("randomness part: "+str(self._defaultRandomness(originalEnergies, swapEnergies)))
 
             exchanges_to_make.update({(partner1, partner2): self.exchange_criterium(originalEnergies, swapEnergies)})
 
@@ -326,7 +326,9 @@ class TemperatureReplicaExchange(ReplicaExchange):
         if(verbose):
             print("Exchange: ", exchanges_to_make)
             print("exchaning param: ", self.exchange_param)
-        print(exchanges_to_make)
+        #print(exchanges_to_make)
+        self._currentTrial += 1
+
         for (partner1ID, partner2ID), exchange in exchanges_to_make.items():
             if(exchange):
                 if(verbose): print("Exchanging: "+str(partner1ID)+"\t"+str(partner2ID)+"\t"+str(exchange)+"\n")
@@ -344,13 +346,15 @@ class TemperatureReplicaExchange(ReplicaExchange):
             else:
                 if (verbose): print("not Exchanging: "+str(partner1ID)+" / "+str(partner2ID)+" \n")
             #add exchange info line here!
-            self._currentTrial += 1
-            self.exchange_information.concat(pd.DataFrame({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner1ID].uniqueID,
+
+            self.exchange_information=self.exchange_information.append({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner1ID].uniqueID,
                                               "replicaI":partner1ID, "exchangeCoordinateI":partner1ID, "TotEI":original_totPots[partner1ID],
-                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner2ID, "TotEJ":original_totPots[partner2ID], "doExchange":exchange}), ignore_index=True)
-            self.exchange_information.concat(pd.DataFrame({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner2ID].uniqueID,
+                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner2ID, "TotEJ":original_totPots[partner2ID], "doExchange":exchange}, ignore_index=True)
+            self.exchange_information=self.exchange_information.append({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner2ID].uniqueID,
                                               "replicaI":partner1ID, "exchangeCoordinateI":partner2ID, "TotEI":swapped_totPots[partner2ID],
-                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner1ID, "TotEJ":swapped_totPots[partner1ID], "doExchange":exchange}), ignore_index=True)
+                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner1ID, "TotEJ":swapped_totPots[partner1ID], "doExchange":exchange}, ignore_index=True)
+
+
 
         self._current_exchanges = exchanges_to_make
 
