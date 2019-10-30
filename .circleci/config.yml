@@ -36,7 +36,7 @@ jobs:
             #less ./requirements.txt
             #conda install scipy numpy
             #conda install --file requirements.txt
-            pip install -r requirements.txt
+            pip install -r requirements.txt --no-cache-dir --compile 
 
       - save_cache:
           paths:
