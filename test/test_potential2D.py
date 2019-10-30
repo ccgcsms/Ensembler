@@ -26,7 +26,7 @@ class potentialCls_wavePotential(unittest.TestCase):
         potential = TwoD.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
         energies = potential.ene(positions)
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=list(expected_result), actual=list(energies), err_msg="The results of "+potential.name+" are not correct!", decimal=8)
 
@@ -43,7 +43,7 @@ class potentialCls_wavePotential(unittest.TestCase):
         potential = TwoD.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
         energies = potential.ene(positions)
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=list(expected_result), actual=list(energies), err_msg="The results of "+potential.name+" are not correct!", decimal=8)
 
@@ -59,7 +59,7 @@ class potentialCls_wavePotential(unittest.TestCase):
 
         potential = TwoD.wavePotential(phase_shift=phase_shift, multiplicity=multiplicity, amplitude=amplitude, y_offset=y_offset, radians=radians)
         energies = potential.dhdpos(positions)
-        print(energies)
+        #print(energies)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies, err_msg="The results of "+potential.name+" are not correct!", decimal=8)
@@ -78,7 +78,7 @@ class potentialCls_wavePotential(unittest.TestCase):
                                         y_offset=y_offset, radians=radians)
         energies = potential.dhdpos(positions)
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=list(expected_result), actual=list(energies),
@@ -91,7 +91,7 @@ class potentialCls_torsionPotential(unittest.TestCase):
             torsionPot = TwoD.torsionPotential(wave_potentials=[WavePotential2])
         except:
             return 0
-        print("DID not get an Exception!")
+        #print("DID not get an Exception!")
         exit(1)
 
     def test_constructor_ListPotentials(self):
@@ -136,7 +136,7 @@ class potentialCls_torsionPotential(unittest.TestCase):
         potential = TwoD.torsionPotential(wave_potentials=[WavePotential, WavePotential2])
         energies = potential.ene(positions)
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=list(expected_result), actual=list(energies), err_msg="The results of "+potential.name+" are not correct!", decimal=8)

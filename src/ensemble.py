@@ -25,8 +25,8 @@ class ReplicaExchange:
     replica_graph_dimensions:int
 
     ##Exchange params/io
-    exchange_information:pd.DataFrame = []
-
+    exchange_information: pd.DataFrame = pd.DataFrame(columns=["nExchange", "uniqueReplicaID", "replicaI", "exchangeCoordinateI", "TotEI",
+                                                                "replicaJ","exchangeCoordinateJ", "TotEJ", "doExchange"])
     ##simulation Params
     nSteps_between_trials = 100
 
@@ -81,6 +81,8 @@ class ReplicaExchange:
         pass
 
     def initialise(self):
+        self._currentTrial = 0
+
         # BUILD replicas
         self.initialise_replica_graph()
 
@@ -235,6 +237,7 @@ class ReplicaExchange:
             self.run()
             self.exchange()
         self.exchange_information = pd.DataFrame(self.exchange_information)
+
     def get_trajectories(self)->Dict[Tuple, List]:
         return {coord:replica.trajectory for coord, replica in self.replicas.items()}
 
@@ -341,12 +344,13 @@ class TemperatureReplicaExchange(ReplicaExchange):
             else:
                 if (verbose): print("not Exchanging: "+str(partner1ID)+" / "+str(partner2ID)+" \n")
             #add exchange info line here!
-            self.exchange_information.append({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner1ID].uniqueID,
+            self._currentTrial += 1
+            self.exchange_information.concat(pd.DataFrame({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner1ID].uniqueID,
                                               "replicaI":partner1ID, "exchangeCoordinateI":partner1ID, "TotEI":original_totPots[partner1ID],
-                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner2ID, "TotEJ":original_totPots[partner2ID], "doExchange":exchange})
-            self.exchange_information.append({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner2ID].uniqueID,
+                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner2ID, "TotEJ":original_totPots[partner2ID], "doExchange":exchange}), ignore_index=True)
+            self.exchange_information.concat(pd.DataFrame({"nExchange":self._currentTrial, "uniqueReplicaID":self.replicas[partner2ID].uniqueID,
                                               "replicaI":partner1ID, "exchangeCoordinateI":partner2ID, "TotEI":swapped_totPots[partner2ID],
-                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner1ID, "TotEJ":swapped_totPots[partner1ID], "doExchange":exchange})
+                                              "replicaJ":partner2ID,"exchangeCoordinateJ":partner1ID, "TotEJ":swapped_totPots[partner1ID], "doExchange":exchange}), ignore_index=True)
 
         self._current_exchanges = exchanges_to_make
 
