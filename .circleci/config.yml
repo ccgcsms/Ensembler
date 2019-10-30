@@ -54,7 +54,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            #. venv/bin/activate
+            echo "${PWD}"
             python test/run_all_tests.py
 
       - store_artifacts:
