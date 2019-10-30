@@ -37,10 +37,9 @@ if __name__ == "__main__":
     first = True
 
     for test_module in modules:
-        print("Loading:\t", test_module)
+        print("Importing:\t", test_module)
         if("conveyor" in test_module):
             continue
-        print("importing: ",test_module)
         imported_test_module = __import__(test_module, globals(), locals(), ['suite'])
         if(first):
             suite = test_loader.loadTestsFromModule(imported_test_module)
@@ -61,8 +60,10 @@ if __name__ == "__main__":
         if(len(test_result.failures)>0 or len(test_result.errors)>0 ):
             print(test_result.failures)
 
-            print("\ttest Failures: \n\t\t", "\n\t\t".join(map(lambda x: str(x[0])+"\n\t\t\t\t"+"\n\t\t\t\t".join(x[1].split("\n")), test_result.failures)))
-            print("\ttest Errors:  \n\t\t", "\n\t\t".join(map(lambda x: str(x[0])+"\n\t\t\t\t"+"\n\t\t\t\t".join(x[1].split("\n"))+"\n", test_result.errors)))
+            print("\ttest Failures: " + str(len(test_result.failures)) + " \n\t\t",
+                  "\n\t\t".join(map(lambda x: str(x[0]) + "\n\t\t\t\t" + "\n\t\t\t\t".join(x[1].split("\n")), test_result.failures)))
+            print("\ttest Errors: " + str(len(test_result.errors)) + " \n\t\t",
+                  "\n\t\t".join(map(lambda x: str(x[0]) + "\n\t\t\t\t" + "\n\t\t\t\t".join(x[1].split("\n")) + "\n", test_result.errors)))
             print()
             raise Exception("")
         else:
