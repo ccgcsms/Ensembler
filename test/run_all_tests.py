@@ -1,4 +1,4 @@
-import os
+import os, sys
 import unittest
 
 #import importlib
@@ -6,15 +6,19 @@ import unittest
 if __name__ == "__main__":
     root_dir = os.path.dirname(__file__)
     test_files = []
+    print("ROOT DIR: "+root_dir)
+    sys.path.append(root_dir)
 
     #FILE MANAGMENT
     ##gather all test_files
     for dir in os.walk(root_dir):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py") and not "test_run_all_tests" in path)])
+
     ##get module import paths
     modules = []
     for test_module in test_files:
-        module_name = "Ensembler" + test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        if module_name.startswith("."): module_name = module_name[1:]
         modules.append(module_name)
 
     #LOAD TESTS
