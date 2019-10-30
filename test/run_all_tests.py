@@ -15,20 +15,20 @@ if __name__ == "__main__":
     print(include_path)
 
     #FILE MANAGMENT
-    ##gather all test_files
     test_root_dir = os.path.dirname(__file__)
     print("TEST ROOT DIR: " + test_root_dir)
 
+    ##gather all test_files
     test_files = []
     for dir in os.walk(test_root_dir):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py") and not "test_run_all_tests" in path)])
     if(len(test_files) == 0):
         raise IOError("Could not find any test in : ", test_root_dir)
 
-    ##get module import paths
+    ##get module import paths - there should be a function for that around
     modules = []
     for test_module in test_files:
-        module_name =  test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  "Ensembler"+test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace(".py", "")
         if(module_name.startswith(".")): module_name = module_name[1:]
         modules.append(module_name)
 
@@ -42,6 +42,7 @@ if __name__ == "__main__":
         print("Loading:\t", test_module)
         if("conveyor" in test_module):
             continue
+        print("importing: ",test_module)
         imported_test_module = __import__(test_module, globals(), locals(), ['suite'])
         if(first):
             suite = test_loader.loadTestsFromModule(imported_test_module)
