@@ -59,10 +59,12 @@ if __name__ == "__main__":
         print("\nSUMMARY: ")
         print("\ttests run:\t", test_result.testsRun)
         if(len(test_result.failures)>0 or len(test_result.errors)>0 ):
-            print("\ttest Failures: \n\t\t", "\n\t\t".join(test_result.failures))
-            print("\ttest Errors:  \n\t\t", "\n\t\t".join(test_result.errors))
+            print(test_result.failures)
+
+            print("\ttest Failures: \n\t\t", "\n\t\t".join(map(lambda x: str(x[0])+"\n\t\t\t\t"+"\n\t\t\t\t".join(x[1].split("\n")), test_result.failures)))
+            print("\ttest Errors:  \n\t\t", "\n\t\t".join(map(lambda x: str(x[0])+"\n\t\t\t\t"+"\n\t\t\t\t".join(x[1].split("\n"))+"\n", test_result.errors)))
             print()
-            raise Exception("Found FAILURE")
+            raise Exception("")
         else:
             print("\ttest Failures:\tNone")
             print("\ttest Errors:\tNone")
