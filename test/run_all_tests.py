@@ -5,18 +5,24 @@ import unittest
 
 if __name__ == "__main__":
     file = __file__
-    root_dir = os.path.dirname(os.getenv("PWD"))
-
-    test_files = []
+    root_dir = os.path.dirname(__file__)
 
     print("PWD", os.getenv("PWD"))
     print("THisFile: ", file)
     print("ROOT DIR: "+root_dir)
     sys.path.append(root_dir)
-    sys.path.append("/root")
+
+
+    #include path:
+    raw_path = os.getenv("PWD")
+    print(raw_path.split("/Ensembler"))
+    include_path = raw_path.split("/Ensembler")[0]
+    sys.path.append(include_path)
+    print(include_path)
 
     #FILE MANAGMENT
     ##gather all test_files
+    test_files = []
     for dir in os.walk(root_dir):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py") and not "test_run_all_tests" in path)])
 
