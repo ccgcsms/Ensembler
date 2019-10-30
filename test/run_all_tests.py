@@ -6,6 +6,7 @@ import unittest
 if __name__ == "__main__":
     root_dir = os.path.dirname(__file__)
     test_files = []
+
     print("ROOT DIR: "+root_dir)
     sys.path.append(root_dir)
 
@@ -17,8 +18,7 @@ if __name__ == "__main__":
     ##get module import paths
     modules = []
     for test_module in test_files:
-        module_name =  test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
-        if module_name.startswith("."): module_name = module_name[1:]
+        module_name =  "Ensembler"+test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
         modules.append(module_name)
 
     #LOAD TESTS
