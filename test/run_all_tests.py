@@ -4,11 +4,14 @@ import unittest
 #import importlib
 
 if __name__ == "__main__":
+    file = __file__
     root_dir = os.path.dirname(__file__)
     test_files = []
 
+    print(os.getenv("PWD"))
+    print(file)
     print("ROOT DIR: "+root_dir)
-    sys.path.append("1/root")
+    sys.path.append("/root")
 
     #FILE MANAGMENT
     ##gather all test_files
