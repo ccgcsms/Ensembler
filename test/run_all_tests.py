@@ -8,7 +8,7 @@ if __name__ == "__main__":
     test_files = []
 
     print("ROOT DIR: "+root_dir)
-    sys.path.append(root_dir)
+    sys.path.append("1/root")
 
     #FILE MANAGMENT
     ##gather all test_files
