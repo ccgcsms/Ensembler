@@ -30,14 +30,13 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            echo "${PWD}"
-            less ./requirements.txt
-            pip install numpy
-            pip install scipy
-            pip install pandas
-
+            #python3 -m venv venv
+            #. venv/bin/activate
+            #echo "${PWD}"
+            #less ./requirements.txt
+            #pip install numpy
+            #pip install scipy
+            #pip install pandas
             #conda install scipy numpy
             #conda install --file requirements.txt
             #pip install -r requirements.txt
