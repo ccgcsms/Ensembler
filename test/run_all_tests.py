@@ -57,12 +57,16 @@ if __name__ == "__main__":
         test_result = test_runner.run(suite)
 
         print("\nSUMMARY: ")
-        print("\ttests run: ", test_result.testsRun)
-        print()
+        print("\ttests run:\t", test_result.testsRun)
         if(len(test_result.failures)>0 or len(test_result.errors)>0 ):
             print("\ttest Failures: \n\t\t", "\n\t\t".join(test_result.failures))
             print("\ttest Errors:  \n\t\t", "\n\t\t".join(test_result.errors))
+            print()
             raise Exception("Found FAILURE")
+        else:
+            print("\ttest Failures:\tNone")
+            print("\ttest Errors:\tNone")
+            print()
         exit(0)
     except Exception as err:
         print("Test did not finish successfully!\n\t"+"\n\t".join(err.args))
