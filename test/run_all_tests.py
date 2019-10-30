@@ -5,13 +5,13 @@ import unittest
 
 if __name__ == "__main__":
     file = __file__
-    root_dir = os.path.dirname(__file__)
+    root_dir = os.path.dirname(os.getenv("PWD"))
     test_files = []
 
-    print(os.getenv("PWD"))
-    print(file)
+    print("PWD", os.getenv("PWD"))
+    print("THisFile: ", file)
     print("ROOT DIR: "+root_dir)
-    sys.path.append("/root")
+    sys.path.append(root_dir)
 
     #FILE MANAGMENT
     ##gather all test_files
@@ -21,7 +21,8 @@ if __name__ == "__main__":
     ##get module import paths
     modules = []
     for test_module in test_files:
-        module_name =  "Ensembler."+test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        if(module_name.startswith(".")): module_name = module_name[1:]
         modules.append(module_name)
 
     #LOAD TESTS
