@@ -25,7 +25,7 @@ class test_MonteCarlo_Integrator(unittest.TestCase):
         potent = pot.OneD.harmonicOsc()
         integrator = integ.monteCarloIntegrator()
         sys = system.system(potential=potent, integrator=integrator)
-        steps=10
+        steps=42
         old_pos, oldForce = sys._currentPosition, sys._currentForce
         integrator.integrate(system=sys, steps=steps)
         new_pos, new_Force = sys._currentPosition, sys._currentForce
