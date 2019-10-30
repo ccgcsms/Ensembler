@@ -219,7 +219,7 @@ class Ensembler:
         return self.__str__()
 
 
-    def __init__(self, caplam, num, system=system.perturbedSystem(temperature=300.0, lam=0.0, potential=pot.OneD.pertHarmonicOsc1D(fc=1.0, alpha=10.0),
+    def __init__(self, caplam, num, system=system.perturbedSystem(temperature=300.0, lam=0.0, potential=pot.OneD.pertHarmonicOsc(fc=1.0, alpha=10.0),
                                                integrator=integrator.metropolisMonteCarloIntegrator()), build=False):
         '''
         initialize Ensemble object

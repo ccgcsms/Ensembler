@@ -177,7 +177,7 @@ class _potentialNDCls:
         self._check_positions_type = self._check_positions_type_singlePos
         self._calculate_energies = self._calculate_energies_singlePos
         self._calculate_dhdpos = self._calculate_dhdpos_singlePos
-        print(__name__+"in _set_singlePos_mode ",self.nDim)
+        #print(__name__+"in _set_singlePos_mode ",self.nDim)
 
     def _set_multiPos_mode(self):
         """
@@ -321,7 +321,7 @@ class _potentialNDMultiState(_potentialNDCls):
         :return type: Iterable[Number]
         """
         # array
-        print(position)
+        #print(position)
         if (isinstance(position, Number)):
             if (self.nDim == 1):
                 return np.array([position for state in range(self.nStates)])
