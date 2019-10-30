@@ -28,10 +28,27 @@ jobs:
             - v1-dependencies-
 
       - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            echo "${PWD}"
+            #less ./requirements.txt
+            #conda install scipy numpy
+            #conda install --file requirements.txt
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
           name: run tests
           command: |
+            . venv/bin/activate
             echo "${PWD}"
-            python test/run_all_tests.py
+            cd test
+            python run_all_tests.py
 
       - store_artifacts:
           path: test-reports
