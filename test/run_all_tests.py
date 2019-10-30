@@ -18,7 +18,7 @@ if __name__ == "__main__":
     ##get module import paths
     modules = []
     for test_module in test_files:
-        module_name =  "Ensembler"+test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  "Ensembler."+test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
         modules.append(module_name)
 
     #LOAD TESTS
