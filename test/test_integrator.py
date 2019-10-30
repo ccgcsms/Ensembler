@@ -24,12 +24,12 @@ class test_MonteCarlo_Integrator(unittest.TestCase):
     def test_integrate(self):
         potent = pot.OneD.harmonicOsc()
         integrator = integ.monteCarloIntegrator()
-        sys = system.system(potential=potent, integrator=integrator)
         steps=42
+        sys = system.system(potential=potent, integrator=integrator)
+        sys.trajectory = []
         old_pos, oldForce = sys._currentPosition, sys._currentForce
         integrator.integrate(system=sys, steps=steps)
         new_pos, new_Force = sys._currentPosition, sys._currentForce
-
         self.assertEqual(steps, len(sys.trajectory), msg="The simulation did not run or was too short!")
         self.assertNotEqual(old_pos, new_pos, msg="Nothing happened here!")
         self.assertNotEqual(oldForce, new_Force, msg="Nothing happened here!")
