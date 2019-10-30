@@ -54,7 +54,16 @@ if __name__ == "__main__":
     try:
         print("TEST SUIT TESTS: ", suite.countTestCases())
         test_runner = unittest.TextTestRunner(verbosity=5)
-        test_runner.run(suite)
+        test_result = test_runner.run(suite)
+        print(vars(test_result))
+        print("SUMMARY: ")
+        print("\ttests run: ", test_result.testsRun)
+        print("\ttest Failures: ", test_result.failures)
+        print("\ttest Errors: ", test_result.errors)
+
+        if(len(test_result.failures)>0 or len(test_result.errors)>0 ):
+            raise Exception("Found FAILURE")
+
         exit(0)
     except Exception as err:
         print("Test did not finish successfully!\n\t"+"\n\t".join(err.args))
