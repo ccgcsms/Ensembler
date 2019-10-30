@@ -52,8 +52,8 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         trajectories = self.group.get_trajectories()
 
 
-        #print(len(trajectories))
-        #print([len(trajectories[t]) for t in trajectories])
+        ##print(len(trajectories))
+        ##print([len(trajectories[t]) for t in trajectories])
 
         self.assertEqual(len(trajectories), 22, msg="not enough trajectories were retrieved!")
         self.assertEquals([len(trajectories[t]) for t in trajectories], second=[nsteps for x in range(replicas)], msg="traj lengths are not correct!")
@@ -70,8 +70,8 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         totPots = self.group.get_Total_Energy()
 
 
-        #print(len(totPots))
-        #print(totPots)
+        ##print(len(totPots))
+        ##print(totPots)
         self.assertEqual(len(totPots), replicas, msg="not enough trajectories were retrieved!")
 
     def test_setPositionsList_1DREnsemble(self):
@@ -121,10 +121,10 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         nsteps = 100
         T_range=range(288, 310)
         self.group = ensemble.TemperatureReplicaExchange(system=sys, temperature_Range=T_range)
-        #print(self.group.get_Total_Energy())
+        ##print(self.group.get_Total_Energy())
         self.group.nSteps_between_trials = nsteps
         self.group.run()
-        #print(self.group.get_Total_Energy())
+        ##print(self.group.get_Total_Energy())
 
 
     def test_exchange_all(self):
@@ -191,7 +191,7 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         self.assertListEqual(finpositions, positions, msg="Positions should not change during exchange!")
         self.assertListEqual(finvelocities, velocities, msg="Velocities should not change during exchange!")
         ##exchange process
-        #print(all_exchanges.values)
+        ##print(all_exchanges.values)
         self.assertEqual(nReplicas//2, len(all_exchanges), msg="length of all exchanges is not correct!")
         #self.assertFalse(all(list(all_exchanges.values())), msg="length of all exchanges is not correct!")
 
@@ -204,10 +204,10 @@ class test_TemperatureReplicaExchangeCls(unittest.TestCase):
         nsteps = 100
         T_range=range(288, 310)
         self.group = ensemble.TemperatureReplicaExchange(system=sys, temperature_Range=T_range)
-        #print(self.group.get_Total_Energy())
+        ##print(self.group.get_Total_Energy())
         self.group.nSteps_between_trials = nsteps
         self.group.simulate(5)
-        #print(self.group.get_Total_Energy())
-        print("Exchanges: ", self.group.exchange_information)
+        ##print(self.group.get_Total_Energy())
+        ##print("Exchanges: ", self.group.exchange_information)
 if __name__ == '__main__':
     unittest.main()

@@ -333,7 +333,7 @@ class envelopedPotentialMultiS(envelopedPotential):
         """
         super().__init__(V_is=V_is, Eoff_i=Eoff_i)
         self.s = s
-        print(s)
+        #print(s)
 
 
     def _calculate_energies_singlePos(self, position:(Iterable[float])) -> np.array:
