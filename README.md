@@ -1,6 +1,6 @@
 # Ensembler - v0.2
 
-[![CircleCI](https://circleci.com/gh/ccgcsms/Ensembler.svg?style=svg)](https://circleci.com/gh/ccgcsms/Ensembler)
+[![CircleCI](https://circleci.com/gh/ccgcsms/Ensembler/tree/BensDevelop.svg?style=svg)](https://circleci.com/gh/ccgcsms/Ensembler/tree/BensDevelop)
 
 ## Description
 This project tries to give users very easy to use and simple functionality to develop code for physical ensembles.
@@ -40,3 +40,5 @@ This project tries to give users very easy to use and simple functionality to de
 ## Current development
 * rebuild Potentials more performant
 * write test for all potentials
+
+
