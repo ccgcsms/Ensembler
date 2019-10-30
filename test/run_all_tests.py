@@ -6,12 +6,14 @@ import unittest
 if __name__ == "__main__":
     file = __file__
     root_dir = os.path.dirname(os.getenv("PWD"))
+
     test_files = []
 
     print("PWD", os.getenv("PWD"))
     print("THisFile: ", file)
     print("ROOT DIR: "+root_dir)
     sys.path.append(root_dir)
+    sys.path.append("/root")
 
     #FILE MANAGMENT
     ##gather all test_files
