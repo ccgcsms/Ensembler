@@ -4,16 +4,10 @@ import unittest
 #import importlib
 
 if __name__ == "__main__":
-    file = __file__
-    root_dir = os.path.dirname(__file__)
-
-    print("PWD", os.getenv("PWD"))
-    print("THisFile: ", file)
-    print("ROOT DIR: "+root_dir)
-    sys.path.append(root_dir)
-
 
     #include path:
+    print("PWD", os.getenv("PWD"))
+
     raw_path = os.getenv("PWD")
     print(raw_path.split("/Ensembler"))
     include_path = raw_path.split("/Ensembler")[0]
@@ -22,14 +16,19 @@ if __name__ == "__main__":
 
     #FILE MANAGMENT
     ##gather all test_files
+    test_root_dir = os.path.dirname(__file__)
+    print("TEST ROOT DIR: " + test_root_dir)
+
     test_files = []
-    for dir in os.walk(root_dir):
+    for dir in os.walk(test_root_dir):
         test_files.extend([dir[0]+"/"+path for path in dir[2] if( path.startswith("test") and path.endswith(".py") and not "test_run_all_tests" in path)])
+    if(len(test_files) == 0):
+        raise IOError("Could not find any test in : ", test_root_dir)
 
     ##get module import paths
     modules = []
     for test_module in test_files:
-        module_name =  test_module.replace(os.path.dirname(root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace(".py", "")
         if(module_name.startswith(".")): module_name = module_name[1:]
         modules.append(module_name)
 
