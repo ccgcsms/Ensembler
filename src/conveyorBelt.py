@@ -5,7 +5,7 @@ from Ensembler.src import system,integrator
 from Ensembler.src import potentials as pot
 
 
-class Ensembler:
+class ConveyorBelt:
     '''
     Conveyor belt ensemble class
     organizes the replicas and their coupling
@@ -264,7 +264,7 @@ class Ensembler:
         self.ene = 0.0
 
 
-def calc_traj(steps=1, ens=Ensembler(0.0, 8)):
+def calc_traj(steps=1, ens=ConveyorBelt(0.0, 8)):
     '''
     function to propagate the ensemble ens steps steps
     :param steps: (int) steps
@@ -277,7 +277,7 @@ def calc_traj(steps=1, ens=Ensembler(0.0, 8)):
     return np.array(ens.systrajs), np.array(ens.traj)
 
 
-def calc_traj_file(steps=1, ens=Ensembler(0.0, 8), filestring='traj'):
+def calc_traj_file(steps=1, ens=ConveyorBelt(0.0, 8), filestring='traj'):
     '''
     function to propagate the ensemble ens steps steps and write to file with name filestring
     :param filestring: file name string
