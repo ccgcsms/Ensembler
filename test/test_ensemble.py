@@ -44,8 +44,10 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         trajectories = self.group.get_trajectories()
 
 
+        print(trajectories)
         print(len(trajectories))
         print([len(trajectories[t]) for t in trajectories])
+        print([trajectories[t][0].temperature for t in trajectories])
 
         self.assertEqual(len(trajectories), 22, msg="not enough trajectories were retrieved!")
         self.assertEquals([len(trajectories[t]) for t in trajectories], second=[nsteps for x in range(replicas)], msg="traj lengths are not correct!")

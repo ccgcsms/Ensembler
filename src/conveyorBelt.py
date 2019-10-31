@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.constants as const
 import copy
+from Ensembler.src import ensemble
 from Ensembler.src import system,integrator
 from Ensembler.src import potentials as pot
 
@@ -35,6 +36,8 @@ class ConveyorBeltEnsemble:
         :param system: a system1D instance
         :param build: build memory?
         '''
+
+
         assert 0.0 <= caplam <= 2 * np.pi, "caplam not allowed"
         assert num >= 1, "At least one system is needed"
 
@@ -66,6 +69,8 @@ class ConveyorBeltEnsemble:
         self.updateBlam(self.caplam)
         while self.stepcount == self.reject:
             self.propagate()
+            break
+
         self.systrajs = []
         self.traj = []
         self.stepcount = -1
@@ -171,7 +176,9 @@ class ConveyorBeltEnsemble:
         '''
         ene = 0.0
         for i in range(self.num):
-            ene += self.systems[i]._currentTotPot+self.systems[i]._currentTotKin
+
+            ene += self.systems[i]._currentTotPot
+            ene += self.systems[i]._currentTotKin if(not np.isnan(self.systems[i]._currentTotKin)) else 0
         self.ene = ene + self.biasene
         return self.ene
 
@@ -184,18 +191,22 @@ class ConveyorBeltEnsemble:
         #        self.oldstate=self.state
         self.state = []
         for j in range(self.num):
-            #            self.systems[j].oldpos=self.systems[j].pos
-            #            self.systems[j].pos += self.systems[j].randomShift()
-            #            self.systems[j].updateEne()
+            #self.systems[j].oldpos=self.systems[j]._currentPosition
+            #self.systems[j]._currentPosition += self.systems[j].integrator.randomShift(nDim=self.systems[j].nDim)
+            #self.systems[j].updateEne()
             self.systems[j].propagate()
+
         oldEne = self.calc_ene()
         oldBiasene = self.biasene
         oldBlam = self.caplam
+
         self.caplam += (np.random.rand() * 2.0 - 1.0) * np.pi / 4.0
         self.caplam = self.caplam % (2.0 * np.pi)
         self.updateBlam(self.caplam)
+
         newEne = self.ene
-        if newEne < oldEne:
+
+        if newEne <= oldEne:
             for i in range(self.num):
                 self.state.append(self.systems[i].getCurrentState())
             self.systrajs.append(self.state)
@@ -265,7 +276,7 @@ class ConveyorBeltEnsemble:
         print(self.__str__())
         return
 
-"""
+
 def calc_traj(steps=1, ens=ConveyorBeltEnsemble(0.0, 8)):
     '''
     function to propagate the ensemble ens steps steps
@@ -292,4 +303,3 @@ def calc_traj_file(steps=1, ens=ConveyorBeltEnsemble(0.0, 8), filestring='traj')
         ens.propagate()
         ens.printTraj(filestring, append='ab')
     return ens.reject
-"""
