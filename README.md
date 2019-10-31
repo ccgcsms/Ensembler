@@ -37,9 +37,7 @@ This project tries to give users very easy to use and simple functionality to de
 
 
 ## Current development
-* rebuild Potentials more performant
-* write test for all potentials
-
+* write Ensembles like Replica Exchange and Conveyor Belt. WARNING Conveyor Belt does not work at the moment.
 
 ## Authors:
 - [dfhahn](https://github.com/dfhahn)
