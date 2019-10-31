@@ -38,7 +38,7 @@ class potentialCls_flatwelND(unittest.TestCase):
         potential = pot.flat_well(x_range=x_range, y_max=y_max, y_min=y_min)
 
         energies = potential.ene(positions)
-        print("HA",energies)
+        #print("HA",energies)
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies, err_msg="The results of "+potential.name+" are not correct!", decimal=8)
 
@@ -107,7 +107,7 @@ class potentialCls_harmonicOscND(unittest.TestCase):
         potential = pot.harmonicOsc(fc=fc, x_shift=x_shift, y_shift=y_shift)
 
         energies = potential.dhdpos(positions)
-        print(energies)
+        #print(energies)
 
         self.assertEqual(type(expected_result), type(energies), msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies, err_msg="The results of "+potential.name+" are not correct!", decimal=8)
@@ -156,7 +156,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[4], [4]]])
         checked = potential._check_positions_type_multiPos(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positions_1D1Pos_float_singlePos(self):
@@ -168,7 +168,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[4], [4]])
         checked = potential._check_positions_type_singlePos(position=position)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positions_1DNPosSameState_Iterable_multiPos(self):
@@ -180,7 +180,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[4],[4]], [[2],[2]], [[3],[3]]], ndmin=3)
         checked = potential._check_positions_type_multiPos(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positions_1DNPosSameState_IterableIterable_multiPos(self):
@@ -192,7 +192,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[4],[4]], [[2],[2]], [[3],[3]]], ndmin=3)
         checked = potential._check_positions_type_multiPos(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positions_2DIterable(self):
@@ -204,7 +204,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[4, 1],  [4, 1]]], ndmin=3)
         checked = potential._check_positions_type(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positionsND1Pos_multPos(self):
@@ -216,7 +216,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[0, 0.5, 1, 2], [0, 0.5, 1, 2]]], ndmin = 2)
         checked = potential._check_positions_type_multiPos(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positions1DNPos(self):
@@ -228,12 +228,12 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[0], [0]], [[0.5], [0.5]], [[1],[1]], [[2],[2]]], ndmin = 2)
         checked = potential._check_positions_type(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
         energies = potential.ene(positions)
-        print("ENE> ", energies)
-        print()
+        #print("ENE> ", energies)
+        #print()
 
 
     def test_check_positionsNDPoscorrectType_multiPos(self):
@@ -245,7 +245,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[[1, 2], [3, 4]]], ndmin=3)
         checked = potential._check_positions_type_multiPos(positions=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_check_positionsNDPoscorrectType_singlePos(self):
@@ -257,7 +257,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         expected = np.array([[1, 2], [3, 4]], ndmin=2)
         checked = potential._check_positions_type_singlePos(position=positions)
 
-        print(checked)
+        #print(checked)
         np.testing.assert_equal(checked, expected, "not the same sorry.")
 
     def test_energiesND1Pos_singlePos(self):
@@ -272,7 +272,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         energies = potential.ene(position)
 
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,
@@ -289,7 +289,7 @@ class potentialCls_envelopedPotential(unittest.TestCase):
         energies = potential.ene(position)
 
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,
@@ -344,7 +344,7 @@ class potentialCls_envelopedPotentialMultiS(unittest.TestCase):
 
         energies = potential.ene(positions)
 
-        print(energies)
+        #print(energies)
         self.assertEqual(type(expected_result), type(energies),
                          msg="returnType of potential was not correct! it should be an np.array")
         np.testing.assert_almost_equal(desired=expected_result, actual=energies,

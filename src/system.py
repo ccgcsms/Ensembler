@@ -130,7 +130,6 @@ class system:
         return np.sqrt(const.gas_constant / 1000.0 * self.temperature / self.mass) * np.random.normal()
 
     def randomPos(self)-> Iterable:
-        print("STATES ARE BIIG")
         if(self.nStates==1 or (self.nStates >1 and self.states_coupled)):
             return self.potential._check_positions_type_singlePos(np.subtract(np.multiply(np.random.rand(self.nDim),20),10))
         else:

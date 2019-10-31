@@ -30,7 +30,7 @@ class test_System1D(unittest.TestCase):
         #check attributes
         self.assertEqual(pot.nDim, sys.nDim, msg="Dimensionality was not the same for system and potential!")
         self.assertEqual([], sys.conditions, msg="Conditions were not empty!")
-        print(curState)
+        #print(curState)
         #check current state intialisation
         self.assertEqual(expected_state.position, curState.position, msg="The initialised Position is not correct!")
         self.assertEqual(expected_state.temperature, curState.temperature, msg="The initialised temperature is not correct!")
@@ -157,8 +157,8 @@ class test_System1D(unittest.TestCase):
 
         old_frame = trajectory.iloc[0]
 
-        print(old_frame)
-        print(init_state)
+        #print(old_frame)
+        #print(init_state)
 
         #Check that the first frame is the initial state!
         self.assertEqual(init_state.position, old_frame.position, msg="The initial state does not equal the frame 0 after propergating in attribute: Position!")
@@ -174,8 +174,8 @@ class test_System1D(unittest.TestCase):
 
         #check that the frames are all different from each other.
         for ind, frame in list(trajectory.iterrows())[1:]:
-            print()
-            print(ind, frame)
+            #print()
+            #print(ind, frame)
             #check that middle step is not sames
             self.assertNotEqual(old_frame.position, frame.position, msg="The frame "+str(ind)+" equals the frame  "+str(ind+1)+" after propergating in attribute: Position!")
             self.assertEqual(old_frame.temperature, frame.temperature, msg="The frame "+str(ind)+" equals the frame  "+str(ind+1)+" after propergating in attribute: temperature!")    #due to integrator
@@ -215,7 +215,7 @@ class test_System1D(unittest.TestCase):
         sys.initVel()
 
         cur_velocity = sys._currentVelocities
-        print(cur_velocity)
+        #print(cur_velocity)
 
         self.assertIsInstance(cur_velocity, float, msg="Velocity has not the correcttype!")
 
@@ -366,7 +366,7 @@ class test_SystemND(unittest.TestCase):
         sys = system.system(potential=pot, integrator=integ, position=position, temperature=temperature)
         curState = sys.getCurrentState()
 
-        print(curState)
+        #print(curState)
         #check attributes
         self.assertEqual(len(position), sys.nDim, msg="Dimensionality was not the same for system and potential!")
         self.assertEqual([], sys.conditions, msg="Conditions were not empty!")
@@ -474,7 +474,7 @@ class test_SystemND(unittest.TestCase):
 
         sys = system.system(potential=pot, integrator=integ, position=position, temperature=temperature)
         initialState = sys.getCurrentState()
-        print(initialState)
+        #print(initialState)
         sys.propagate()
 
         #check that middle step is not sames
@@ -501,8 +501,8 @@ class test_SystemND(unittest.TestCase):
 
         old_frame = trajectory.iloc[0]
 
-        print(old_frame)
-        print(init_state)
+        #print(old_frame)
+        #print(init_state)
 
         #Check that the first frame is the initial state!
         self.assertListEqual(list(init_state.position), list(old_frame.position), msg="The initial state does not equal the frame 0 after propergating in attribute: Position!")
@@ -518,7 +518,7 @@ class test_SystemND(unittest.TestCase):
         old_frame.dhdpos = [old_frame.dhdpos for i in range(3)]
         #check that the frames are all different from each other.
         for ind, frame in list(trajectory.iterrows())[1:]:
-            print(ind, frame)
+            #print(ind, frame)
             #check that middle step is not sames
             self.assertTrue(all([sp != ip for sp, ip in zip(old_frame.position, frame.position)]), msg="The frame "+str(ind)+" equals the frame  "+str(ind+1)+" after propergating in attribute: Position!")
             self.assertEqual(old_frame.temperature, frame.temperature, msg="The frame "+str(ind)+" equals the frame  "+str(ind+1)+" after propergating in attribute: temperature!")    #due to integrator
@@ -558,7 +558,7 @@ class test_SystemND(unittest.TestCase):
         sys.initVel()
 
         cur_velocity = sys._currentVelocities
-        print(cur_velocity, type(cur_velocity))
+        #print(cur_velocity, type(cur_velocity))
 
         self.assertIsInstance(cur_velocity, Iterable, msg="Velocity has not the correcttype!")
         self.assertTrue(all(map(lambda vel: isinstance(vel, Number),cur_velocity)),msg="Velocity has not the correcttype!")
@@ -656,9 +656,9 @@ class test_SystemND(unittest.TestCase):
         sys.set_Temperature(temperature2)
 
         # check that middle step is not sames
-        print(initialState)
-        print(sys._currentVelocities)
-        print(sys._currentTotKin)
+        #print(initialState)
+        #print(sys._currentVelocities)
+        #print(sys._currentTotKin)
         self.assertListEqual(list(sys._currentPosition), list(initialState.position), msg="The initialState equals the currentState after propergating in attribute: Position!")
         self.assertNotEqual(sys._currentTemperature, initialState.temperature, msg="The initialState does equal the currentState after propergating in attribute: temperature!")
         self.assertAlmostEqual(sys._currentTotPot, initialState.totPotEnergy, msg="The initialState  does equal  the currentState after propergating in attribute: totPotEnergy!")
@@ -719,7 +719,7 @@ class test_perturbedSystem1D(unittest.TestCase):
         #check attributes
         self.assertEqual(pot.nDim, sys.nDim, msg="Dimensionality was not the same for system and potential!")
         self.assertEqual([], sys.conditions, msg="Conditions were not empty!")
-        print(curState)
+        #print(curState)
         #check current state intialisation
         self.assertListEqual(list(curState.position), list(expected_state.position), msg="The initialised Position is not correct!")
         self.assertEqual(curState.temperature, expected_state.temperature, msg="The initialised temperature is not correct!")
@@ -915,7 +915,7 @@ class test_perturbedSystem1D(unittest.TestCase):
         sys.initVel()
 
         cur_velocity = sys._currentVelocities
-        print(cur_velocity)
+        #print(cur_velocity)
         expected_vel = np.array([-2.8014573319669176,-2.8014573319669176])
         self.assertEqual(type(cur_velocity), type(expected_vel),msg="Velocity has not the correcttype!")
         self.assertTrue(all(map(lambda vel: isinstance(vel, Number), cur_velocity)),msg="Velocity has not the correcttype!")

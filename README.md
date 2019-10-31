@@ -1,6 +1,6 @@
 # Ensembler - v0.2
 
-[![CircleCI](https://circleci.com/gh/ccgcsms/Ensembler.svg?style=svg)](https://circleci.com/gh/ccgcsms/Ensembler)
+[![CircleCI](https://circleci.com/gh/ccgcsms/Ensembler/tree/BensDevelop.svg?style=shield)](https://circleci.com/gh/ccgcsms/Ensembler/tree/BensDevelop)
 
 ## Description
 This project tries to give users very easy to use and simple functionality to develop code for physical ensembles.
@@ -36,7 +36,11 @@ This project tries to give users very easy to use and simple functionality to de
    This module contains the replica exchange and conveyorbelt approaches.
 
 
-
 ## Current development
 * rebuild Potentials more performant
 * write test for all potentials
+
+
+## Authors:
+- [dfhahn](https://github.com/dfhahn)
+- [schroederb](https://github.com/schroederb) 
