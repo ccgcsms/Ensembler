@@ -8,7 +8,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+**look_up_tables
 # Distribution / packaging
 .Python
 build/
