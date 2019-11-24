@@ -20,7 +20,6 @@ def significant_decimals(s:float)->float:
     else:
         return s
 
-#Plot
 def plot_1DPotential(potential: _potential1DCls, positions:list,
                      x_range=None, y_range=None, title:str=None, ax=None):
     # generat Data
@@ -76,7 +75,8 @@ def plot_1DPotential_dhdpos(potential: _potential1DCls, positions:list,
     pass
 
 
-def plot_1DPotential_Term(potential:_potential1DCls, positions: list, x_range=None, y_range=None, title: str = None, ax=None):
+def plot_1DPotential_Term(potential:_potential1DCls, positions: list,
+                          x_range=None, y_range=None, title: str = None, ax=None):
     fig, axes = plt.subplots(nrows=1, ncols=2)
     plot_1DPotential(potential=potential, positions=positions, ax=axes[0], x_range=x_range, y_range=y_range, title="Pot")
     plot_1DPotential_dhdpos(potential=potential, positions=positions, ax=axes[1], x_range=x_range, y_range=y_range, title="dhdpos")
