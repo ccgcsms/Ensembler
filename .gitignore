@@ -105,3 +105,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#large files:
+./src/potentials/look_up_tables
