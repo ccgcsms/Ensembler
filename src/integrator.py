@@ -83,6 +83,7 @@ class monteCarloIntegrator(_integratorCls):
         # while no value in spaceRange was found, terminates in first run if no spaceRange
         while(True):
             current_state = system.currentState
+
             self.oldpos = current_state.position
             self.randomShift(system.nDim)
             self.newPos = np.add(self.oldpos,self.posShift)

@@ -179,19 +179,24 @@ class envelopedPotential(_potentialNDCls):
         msg = super().__str__()
         msg += "\tEnveloped Potentials: \n\t\t"+"\n\t\t".join(*[str(p).split("\n") for p in self.V_is])+"\n"
         return msg
+
     def _check_positions_type_singlePos(self, position: Union[Iterable[numbers.Number], numbers.Number]) -> np.array:
-        print(position)
+        #print(position)
         #print("hmmm", position)
         if (isinstance(position, numbers.Number)):
                 return np.array([[position] for state in range(self.nStates)], ndmin=2)
         elif (isinstance(position, Iterable)):
-            if(all([isinstance(x, numbers.Number) for x in position])):    #ndim pot list
+            if(len(position) == self.nDim and all([isinstance(x, numbers.Number) for x in position])):    #ndim pot list
                 return np.array([position for state in range(self.nStates)], ndmin=2)
-            elif(len(position) == self.nDim and all([isinstance(x, numbers.Number) for x in position for y in x ])):    #nDim pos lis
+            elif(len(position) == self.nDim and all([isinstance(x, Iterable) for x in position]) and all([isinstance(x, numbers.Number) for x in position for y in x ])):    #nDim pos lis
                 return np.array([position for position in range(self.nStates)], ndmin=3)
             elif(len(position) == self.nStates):    #nDim pos lis
                 if(all([isinstance(x, Iterable) and (len(x)==self.nDim or self.nDim==-1) and all([isinstance(y, numbers.Number) for y in x]) for x in position])):
                     return np.array(position, ndmin=2)
+            #hack for indep. eds
+            elif (len(position) == self.nStates and all([isinstance(x, Iterable) for x in position]) and len(position[0]) == self.nStates):
+                return np.array([[x] for x in position[0]])
+
             else:
                 raise Exception("This is an unknown type of Data structure: " + str(type(position)) + "\n" + str(position))
         else:
@@ -342,7 +347,6 @@ class envelopedPotentialMultiS(envelopedPotential):
         """
         super().__init__(V_is=V_is, Eoff_i=Eoff_i)
         self.s = s
-        print(s)
 
 
     def _calculate_energies_singlePos(self, position:(Iterable[float])) -> np.array:
@@ -363,3 +367,7 @@ class envelopedPotentialMultiS(envelopedPotential):
         #print(sum_prefactors)
         Vr = float(np.sum(np.multiply(-1, sum_prefactors)))
         return Vr
+
+    
+    
+    

@@ -4,9 +4,9 @@ from Ensembler.src import potentials as potent
 
 class testEnsemble(unittest.TestCase):
     def testEnsemble(self):
-        ens = ensemble.ConveyorBeltEnsemble(0.0, 1)
+        ens = ensemble.ConveyorBelt(0.0, 1)
         ens.calc_ene()
-        ens.propergate()
+        ens.propagate()
         ens.calc_ene()
         ens.print_systems()
 
@@ -17,10 +17,10 @@ class testEnsemble(unittest.TestCase):
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb)
 
         sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
-        ens = ensemble.ConveyorBeltEnsemble(0.0, 1, system=sys)
+        ens = ensemble.ConveyorBelt(0.0, 1, system=sys)
 
         ens.calc_ene()
-        ens.propergate()
+        ens.propagate()
         ens.calc_ene()
         ens.print_systems()
 
@@ -32,9 +32,9 @@ class testEnsemble(unittest.TestCase):
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
         sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
-        ens = ensemble.ConveyorBeltEnsemble(0.0, 1, system=sys)
+        ens = ensemble.ConveyorBelt(0.0, 1, system=sys)
         ens.calc_ene()
-        ens.propergate()
+        ens.propagate()
         ens.calc_ene()
         ens.print_systems()
 
@@ -46,10 +46,10 @@ class testEnsemble(unittest.TestCase):
         pot = potent.OneD.linCoupledHosc(ha=ha, hb=hb, lam=lam)
 
         sys = system.perturbedSystem(temperature=300.0, potential=pot, integrator=integrator)
-        ens = ensemble.ConveyorBeltEnsemble(0.0, 1, system=sys)
+        ens = ensemble.ConveyorBelt(0.0, 1, system=sys)
 
-        #print(ensemble.calc_traj(steps=10, ens=ens))
-        #ens = ensemble.Ensembler(0.0, 8, system=sys)
+        print(ensemble.calc_traj(steps=10, ens=ens))
+        ens = ensemble.ConveyorBeltEnsemble(0.0, 8, system=sys)
 
         #ensemble.calc_traj_file(steps=100, ens=ens)
         #import os

@@ -87,8 +87,8 @@ class system:
         #PREPARE THE SYSTEM
         ##Make System Potential and initial State
         self.potential._set_singlePos_mode()    #easier execution... does apparently not save so much performacne
-        self.init_state(initial_position=position)
-        self.potential._set_no_type_check()     #initially taken care by system. Saves performance!
+        self.init_position(initial_position=position)
+        self.potential._set_multiPos_mode()
 
         ##check if system should be coupled to conditions:
         for condition in self.conditions:
@@ -104,8 +104,17 @@ class system:
     """
         Initialisation
     """
+    def initialise(self, withdraw_Traj:bool=False, init_position:bool=True, init_velocity:bool=True):
+        if(withdraw_Traj):
+            self.trajectory = []
 
-    def init_state(self, initial_position=None):
+        if(init_position):
+            self.init_position()
+
+        if(init_velocity):
+            self.init_velocities()
+
+    def init_position(self, initial_position=None):
         #initial position given?
         if (type(initial_position) == type(None)):
             self.initial_positions = self.randomPos()
@@ -115,22 +124,27 @@ class system:
         #self._currentForce = self.potential.dhdpos(self.initial_positions)  #initialise forces!    #todo!
 
         #set a new current_state
+        self.updateEne()
         self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature)
 
-    def initVel(self)-> NoReturn:
+        return self.initial_positions
+
+    def init_velocities(self)-> NoReturn:
         if(self.nStates>1):
             self._currentVelocities = [[self._gen_rand_vel() for dim in range(self.nDim)] for s in range(self.nStates)] if(self.nDim>1) else [self._gen_rand_vel() for state in range(self.nStates)]
         else:
             self._currentVelocities = [self._gen_rand_vel() for dim in range(self.nDim)] if (self.nDim > 1) else self._gen_rand_vel()
 
         self.veltemp = self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2  # t
+
+        self.updateEne()
+        self.set_current_state(currentPosition=self._currentPosition, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature)
         return self._currentVelocities
 
     def _gen_rand_vel(self)->float:
         return np.sqrt(const.gas_constant / 1000.0 * self.temperature / self.mass) * np.random.normal()
 
     def randomPos(self)-> Iterable:
-        print("STATES ARE BIIG")
         if(self.nStates==1 or (self.nStates >1 and self.states_coupled)):
             return self.potential._check_positions_type_singlePos(np.subtract(np.multiply(np.random.rand(self.nDim),20),10))
         else:
@@ -187,10 +201,13 @@ class system:
 
         if(withdrawTraj):
             self.trajectory = []
-            
+
+        self.potential._set_no_type_check()     #initially taken care by system. Saves performance!
+        self.potential._set_singlePos_mode()
+
         if(initSystem): #type(self._currentVelocities) == type(None) or type(self._currentPosition) == type(None)
-            self.initVel()
-            self.init_state(initial_position=self.initial_positions)
+            self.init_velocities()
+            self.init_position(initial_position=self.initial_positions)
 
         self.updateCurrentState()
 
@@ -204,7 +221,7 @@ class system:
                 self.trajectory.append(self.currentState)
 
             #Do one simulation Step. Todo: change to do multi steps
-            self.propagate()
+            self.propergate()
 
             #Calc new Energy
             self.updateEne()
@@ -218,10 +235,13 @@ class system:
         if(step%save_every_state != 0 ):
             self.trajectory.append(self.currentState)
 
+        self.potential._set_type_check()    #initially taken care by system. Saves performance!
+        self.potential._set_multiPos_mode()
+
         if(show_progress): print("100%")
         return self.currentState
 
-    def propagate(self)->NoReturn:
+    def propergate(self)->NoReturn:
         self._currentPosition, self._currentVelocities, self._currentForce = self.integrator.step(self)
 
     def applyConditions(self)-> NoReturn:
@@ -264,7 +284,18 @@ class system:
         return pd.DataFrame.from_dict([frame._asdict() for frame  in self.trajectory])
 
     def set_position(self, position):
+        self.potential._set_singlePos_mode()
         self._currentPosition = self.potential._check_positions_type_singlePos(position)
+        if(len(self.trajectory) == 0):
+            self.initial_positions = self._currentPosition
+        self.updateEne()
+        self.updateCurrentState()
+        self.potential._set_multiPos_mode()
+
+    def set_velocities(self, velocities):
+        self._currentVelocities = self.potential._check_positions_type_singlePos(velocities)
+        self.updateEne()
+        self.updateCurrentState()
 
     def set_current_state(self, currentPosition:(Number or Iterable), currentVelocities:(Number or Iterable)=0, currentForce:(Number or Iterable)=0, currentTemperature:Number=298):
         self._currentPosition = currentPosition
@@ -311,7 +342,7 @@ class perturbedSystem(system):
         super().__init__(potential=potential, integrator=integrator, conditions=conditions, temperature=temperature, position=position)
 
 
-    def init_state(self, initial_position=None):
+    def init_position(self, initial_position=None):
         #initial position given?
         if (type(initial_position) == type(None) or np.isnan(initial_position)):
             self.initial_positions = self.randomPos()
@@ -324,7 +355,7 @@ class perturbedSystem(system):
         self.set_current_state(currentPosition=self.initial_positions, currentVelocities=self._currentVelocities, currentForce=self._currentForce, currentTemperature=self.temperature,
                                currentLambda=self._currentLam, currentdHdLam=self._currentdHdLam)
 
-    def initVel(self)-> NoReturn:
+    def init_velocities(self)-> NoReturn:
         self._currentVelocities = np.array([[self._gen_rand_vel() for dim in range(self.nDim)] for state in range(self.nStates)] if(self.nDim>1) else [self._gen_rand_vel() for state in range(self.nStates)])
         self.veltemp = np.sum(self.mass / const.gas_constant / 1000.0 * np.linalg.norm(self._currentVelocities) ** 2) # t
         return self._currentVelocities
