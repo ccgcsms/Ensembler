@@ -8,7 +8,7 @@ import numbers
 import numpy as np
 from typing import Iterable, Union
 
-from Ensembler.src.potentials._baseclasses import _potentialNDCls
+from src.potentials._baseclasses import _potentialNDCls
 
 """
 standard potentials
@@ -329,45 +329,3 @@ class envelopedPotential(_potentialNDCls):
         super()._set_type_check()
         [V._set_type_check() for V in self.V_is]
 
-class envelopedPotentialMultiS(envelopedPotential):
-    """
-    .. autoclass:: envelopedPotential
-    """
-    V_is:Iterable[_potentialNDCls] = None
-    E_is:Iterable[float] = None
-    nStates:int = None
-    s:Iterable[float] = None
-
-    def __init__(self, V_is: Iterable[_potentialNDCls], s: Iterable[float], Eoff_i: Iterable[float] = None):
-        """
-
-        :param V_is:
-        :param s:
-        :param Eoff_i:
-        """
-        super().__init__(V_is=V_is, Eoff_i=Eoff_i)
-        self.s = s
-
-
-    def _calculate_energies_singlePos(self, position:(Iterable[float])) -> np.array:
-        #print("NDSi", position)
-
-        partA = np.multiply(-self.s[0], np.subtract(self.V_is[0].ene(position[0]), self.Eoff_i[0]))
-        partB = np.multiply(-self.s[1], np.subtract(self.V_is[1].ene(position[1]), self.Eoff_i[1]))
-        #print("partA", partA)
-        #print("partB", partB)
-
-        sum_prefactors = max(partA, partB) + np.log(1 + np.exp(min(partA, partB) - max(partA, partB)))
-
-        # more than two states!
-        for state in range(2, self.nStates):
-            partN = np.multiply(-self.s[state], np.subtract(self.V_is[state].ene(position[state]), self.Eoff_i[state]))
-            sum_prefactors = max(sum_prefactors, partN) + np.log(1 + np.exp(min(sum_prefactors, partN) - max(sum_prefactors, partN)))
-
-        #print(sum_prefactors)
-        Vr = float(np.sum(np.multiply(-1, sum_prefactors)))
-        return Vr
-
-    
-    
-    

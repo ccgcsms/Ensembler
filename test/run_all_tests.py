@@ -5,14 +5,14 @@ import unittest
 
 if __name__ == "__main__":
     #include path:
-    print("PWD", os.getenv("PWD"))
-    raw_path = os.getenv("PWD")
+    print("PWD", os.getcwd())
+    raw_path = os.getcwd()
     include_path = raw_path.split("/Ensembler")[0]
     sys.path.append(include_path)
     print("sys path append:",include_path)
 
     #FILE MANAGMENT
-    test_root_dir = raw_path
+    test_root_dir = raw_path.replace("Ensembler", "")
     print("TEST ROOT DIR: " + test_root_dir)
 
     ##gather all test_files
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     ##get module import paths - there should be a function for that around
     modules = []
     for test_module in test_files:
-        module_name =  "Ensembler"+test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace(".py", "")
+        module_name =  "Ensembler"+test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace("\\", ".").replace(".py", "")
         if(module_name.startswith(".")): module_name = module_name[1:]
         modules.append(module_name)
 

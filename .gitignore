@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#VSCode stuff
+**.vscode
 #Pycharm kram
 **.idea
 

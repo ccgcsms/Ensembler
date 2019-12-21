@@ -1,5 +1,5 @@
-from Ensembler.src.system import system as sys
-from Ensembler.src.conditions.conditions import Condition
+from src.system import system as sys
+from src.conditions._conditions import Condition
 
 class thermostat(Condition):
     """

@@ -1,8 +1,9 @@
 import numpy as np
 import typing as t
 from collections import Iterable
-from Ensembler.src.conditions.conditions import Condition
-from Ensembler.src.system import system as sys
+
+from src.conditions._conditions import Condition
+from src.system import system as sys
 
 class periodicBoundaryCondition(Condition):
     """

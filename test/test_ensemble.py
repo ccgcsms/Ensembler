@@ -1,9 +1,10 @@
 import unittest
 import os ,sys
-sys.path.append(os.path.dirname(__file__+"/.."))
+sys.path.append(os.path.dirname(__file__)+"/..")
 
-from Ensembler.src import system, integrator as integrators, potentials as pot
-from Ensembler.src import ensemble
+
+from src import system, integrator as integrators, potentials as pot
+from src import ensemble
 
 
 class test_ReplicaExchangeCls(unittest.TestCase):

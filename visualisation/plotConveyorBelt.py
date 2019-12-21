@@ -13,6 +13,7 @@ def calc_lam(CapLam, i=0, numsys=8, w=0.1):
         ome=2.0*np.pi-ome
     return ome/np.pi
 
+
 def drawCirc(ax,radius,centX,centY,angle_,theta2_,lineWidth=3, color_='black'):
     #========Line
     arc = patches.Arc([centX,centY],radius,radius,angle=angle_,
@@ -48,6 +49,7 @@ def drawCirc(ax,radius,centX,centY,angle_,theta2_,lineWidth=3, color_='black'):
         )
     )
     ax.set_xlim([centX-radius,centY+radius]) and ax.set_ylim([centY-radius,centY+radius])
+
 
 def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
     pSize=2.009
@@ -92,9 +94,9 @@ def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
 
     ax.plot(cvb_bot[:,0], cvb_bot[:,1], 'k', lw=lineWidth, zorder=1)
     ax.plot(cvb_top[:,0], cvb_top[:,1], 'k', lw=lineWidth, zorder=1)
-#    ax.add_artist(patches.Arc((rx,shifty+ry), 2*rx, 2*ry, theta1=90, theta2=270, lw=lineWidth))
+    #    ax.add_artist(patches.Arc((rx,shifty+ry), 2*rx, 2*ry, theta1=90, theta2=270, lw=lineWidth))
     ax.add_artist(patches.Arc((1.0-rx,shifty+ry), 2*rx, 2*ry, theta1=270, theta2=90, lw=lineWidth))
-#    ax.add_artist(patches.Arc((rx,shifty+ry), 1.4*rx, 1.4*ry, lw=lineWidth))
+    #    ax.add_artist(patches.Arc((rx,shifty+ry), 1.4*rx, 1.4*ry, lw=lineWidth))
     ax.add_artist(patches.Arc((1.0-rx,shifty+ry), 1.4*rx, 1.4*ry, lw=lineWidth))
     # ax.annotate(r'$\Lambda=0$', xy=(-0.01, shifty+ry), xytext=(-0.05, shifty+ry), va='center', ha='right', arrowprops=dict(arrowstyle='-'))
     # ax.annotate(r'$\Lambda=\frac{\pi}{2}$', xy=(0.5,  shifty+2*ry+0.01), xytext=(0.5, shifty+2*ry+0.05), va='bottom', ha='center', arrowprops=dict(arrowstyle='-'))
@@ -109,8 +111,8 @@ def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
     #     ax.annotate('Current state:\n$\Lambda={:.1f}$'.format(CapLam), xy=(calc_lam(CapLam, 0, numsys=M), shifty+2.0*ry+shiftMarker),
     #         xytext=(calc_lam(CapLam, 0, numsys=M), shifty+3.5*ry),
     #         arrowprops=dict(arrowstyle='<-', linewidth=3), va='center', ha='center', zorder=0)
-#arrows in the conveyor belt
-#    drawCirc(ax,rx*0.8,rx,shifty+ry,45,270, color_='red')
+    #arrows in the conveyor belt
+    #    drawCirc(ax,rx*0.8,rx,shifty+ry,45,270, color_='red')
     drawCirc(ax,rx*0.8,1.0-rx,shifty+ry,225,270, lineWidth=lineWidth, color_='red')
 
     for i in range(int(M/2)):
@@ -150,7 +152,7 @@ def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
     ax.set_ylim(0,1.2/goldRat)
     ax.set_xticks([0.0, 0.5, 1.0])
     ax.set_xticklabels(['0\n(A)', r'$\sfrac{1}{2}$', '1\n(B)'])
-#    ax.text(lamVals[-1], gVals[-1]-0.05, 'Free energy profile', ha='right', va='top')
+    #    ax.text(lamVals[-1], gVals[-1]-0.05, 'Free energy profile', ha='right', va='top')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
     ax.set_yticks([])
@@ -164,7 +166,6 @@ def drawFunicular(x, y, CapLam=0.1, M=2, drawArrows=False):
     ax.text( -0.025, 0.25/goldRat, '$G(\lambda)$', ha='right', va='center', fontsize=14)
     ax.text(  1.025, 0.0, '$\lambda$', ha='left', va='center', fontsize=14)
     return fig
-
 
 
 def drawEnsembler(x, y, CapLam=0.1, M=8, drawArrows=False):
@@ -214,6 +215,7 @@ def drawEnsembler(x, y, CapLam=0.1, M=8, drawArrows=False):
             y.append(np.cos(alpha))
     shiftMarker=0.02*np.sqrt(2)
 
+    #funicular
     ax.plot(cvb_bot[:,0], cvb_bot[:,1], 'k', lw=lineWidth)
     ax.plot(cvb_top[:,0], cvb_top[:,1], 'k', lw=lineWidth)
     ax.add_artist(patches.Arc((rx,shifty+ry), 2*rx, 2*ry, theta1=90, theta2=270, lw=lineWidth))
@@ -233,7 +235,8 @@ def drawEnsembler(x, y, CapLam=0.1, M=8, drawArrows=False):
             ax.annotate('Current state:\n$\Lambda={:.1f}$'.format(CapLam), xy=(calc_lam(CapLam, 0, numsys=M), shifty+2.0*ry+shiftMarker),
                         xytext=(calc_lam(CapLam, 0, numsys=M), shifty+6*ry),
                         arrowprops=dict(arrowstyle='<-', linewidth=1.0, shrinkA=0.0), fontsize='small', va='top', ha='center', zorder=0, bbox=dict(pad=-.1, lw=0.0, color='None'))
-#arrows in the conveyor belt
+    
+    #arrows in the conveyor belt
     drawCirc(ax,rx*0.8,rx,shifty+ry,45,270, lineWidth=1.0, color_='red')
     drawCirc(ax,rx*0.8,1.0-rx,shifty+ry,225,270, lineWidth=1.0, color_='red')
 
@@ -274,45 +277,45 @@ def drawEnsembler(x, y, CapLam=0.1, M=8, drawArrows=False):
             if drawArrows:
                 ax.annotate('', xy=(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker), xytext=(x-0.1, gVals[np.abs(lamVals-x+0.1).argmin()]+shiftMarker), arrowprops=dict(arrowstyle='<-', linewidth=lineWidth))
 
-
-    # for i in range(int(M/2)):
-    #     x=calc_lam(CapLam, i, numsys=M)-np.sqrt(1-y[i]**2)*shiftMarker
-    #     ax.add_patch(                    #Create triangle as arrow head
-    #         patches.RegularPolygon(
-    #         (x, shifty+ry+y[i]*ry+y[i]*shiftMarker),            # (x,y)
-    #         4,                       # number of vertices
-    #         0.01,                # radius
-    #         rotation[i]/180.0*np.pi,     # orientation
-    #         color='red',
-    #         path_effects=pathEffects
-    #         )
-    #     )
-    #     ax.scatter(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker, s=100, marker='o', edgecolors='face', color='r', zorder=10)
-    #     if drawArrows:
-    #         ax.annotate('', xy=(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker), xytext=(x+0.05, gVals[np.abs(lamVals-x-0.05).argmin()]+shiftMarker), arrowprops=dict(arrowstyle='<-'))
-    #     ax.plot([x, x], [gVals[np.abs(lamVals-x).argmin()], shifty+ry+y[i]*ry+y[i]*shiftMarker], color='0.8', lw=2, zorder=0)
-    # for i in range(int(M/2)):
-    #     x=calc_lam(CapLam, i+int(M/2), numsys=M)-np.sqrt(1-y[i]**2)*shiftMarker
-    #     ax.add_patch(                    #Create triangle as arrow head
-    #         patches.RegularPolygon(
-    #             (x, shifty-y[i]*shiftMarker),            # (x,y)
-    #             4,                       # number of vertices
-    #             0.01,                # radius
-    #             rotation[i]/180.0*np.pi,     # orientation
-    #             color='red',
-    #             path_effects=pathEffects
-    #         )
-    #     )
-    #     ax.plot([x, x], [gVals[np.abs(lamVals-x).argmin()], shifty+(1.0-y[i])*ry-y[i]*shiftMarker], color='0.8', lw=2, zorder=0)
-    #     ax.scatter(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker, s=100, marker='o', edgecolors='face', color='r', zorder=10)
-    #     if drawArrows:
-    #         ax.annotate('', xy=(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker), xytext=(x-0.05, gVals[np.abs(lamVals-x+0.05).argmin()]+shiftMarker), arrowprops=dict(arrowstyle='<-'))
-
+    """ no idea dear!
+    for i in range(int(M/2)):
+        x=calc_lam(CapLam, i, numsys=M)-np.sqrt(1-y[i]**2)*shiftMarker
+        ax.add_patch(                    #Create triangle as arrow head
+            patches.RegularPolygon(
+            (x, shifty+ry+y[i]*ry+y[i]*shiftMarker),            # (x,y)
+            4,                       # number of vertices
+            0.01,                # radius
+            rotation[i]/180.0*np.pi,     # orientation
+            color='red',
+            path_effects=pathEffects
+            )
+        )
+        ax.scatter(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker, s=100, marker='o', edgecolors='face', color='r', zorder=10)
+        if drawArrows:
+            ax.annotate('', xy=(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker), xytext=(x+0.05, gVals[np.abs(lamVals-x-0.05).argmin()]+shiftMarker), arrowprops=dict(arrowstyle='<-'))
+        ax.plot([x, x], [gVals[np.abs(lamVals-x).argmin()], shifty+ry+y[i]*ry+y[i]*shiftMarker], color='0.8', lw=2, zorder=0)
+    for i in range(int(M/2)):
+        x=calc_lam(CapLam, i+int(M/2), numsys=M)-np.sqrt(1-y[i]**2)*shiftMarker
+        ax.add_patch(                    #Create triangle as arrow head
+            patches.RegularPolygon(
+                (x, shifty-y[i]*shiftMarker),            # (x,y)
+                4,                       # number of vertices
+                0.01,                # radius
+                rotation[i]/180.0*np.pi,     # orientation
+                color='red',
+                path_effects=pathEffects
+            )
+        )
+        ax.plot([x, x], [gVals[np.abs(lamVals-x).argmin()], shifty+(1.0-y[i])*ry-y[i]*shiftMarker], color='0.8', lw=2, zorder=0)
+        ax.scatter(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker, s=100, marker='o', edgecolors='face', color='r', zorder=10)
+        if drawArrows:
+            ax.annotate('', xy=(x, gVals[np.abs(lamVals-x).argmin()]+shiftMarker), xytext=(x-0.05, gVals[np.abs(lamVals-x+0.05).argmin()]+shiftMarker), arrowprops=dict(arrowstyle='<-'))
+    """
     ax.set_xlim(-0.1,1.1)
     ax.set_ylim(0,1.2/goldRat)
     ax.set_xticks([0.0, 0.5, 1.0])
     ax.set_xticklabels(['0\n(A)', r'$\sfrac{1}{2}$', '1\n(B)'])
-#    ax.text(lamVals[-1], gVals[-1]-0.05, 'Free energy profile', ha='right', va='top')
+    #    ax.text(lamVals[-1], gVals[-1]-0.05, 'Free energy profile', ha='right', va='top')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
     ax.set_yticks([])

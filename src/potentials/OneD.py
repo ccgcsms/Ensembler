@@ -10,8 +10,8 @@ from numbers import Number
 import scipy.constants as const
 from collections.abc import Iterable, Sized
 
-from Ensembler.src.potentials import ND
-from Ensembler.src.potentials._baseclasses import _potential1DCls, _perturbedPotentialNDCls
+from src.potentials import ND
+from src.potentials._baseclasses import _potential1DCls, _perturbedPotentialNDCls
 
 """
     SIMPLE POTENTIALS
@@ -323,6 +323,8 @@ class pertHarmonicOsc(_perturbedPotentialNDCls):
     name = "perturbed Harmonic Oscilator"
     nStates = 1
     nDim=1
+    lam:float=0
+
     def __init__(self, fc=1.0, alpha=10.0, gamma=0.0, lam: float = 0.0):
         '''
         Initializes a potential of the form V = 0.5 * (1 + alpha * lam) * fc * (pos - gamma * lam) ** 2

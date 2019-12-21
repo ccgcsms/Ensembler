@@ -1,10 +1,10 @@
 import sys, os
-sys.path.append(os.path.dirname(__file__)+"/..")
+sys.path.append(os.path.dirname(__file__))
 
-from Ensembler.src import ensemble, integrator, potentials, system
+from src import potentials, integrator, system, ensemble, conditions
 
 try:
-    from Ensembler import visualisation
+    import visualisation
 except Exception as err:
     print("Could not find ... therefore no Visualisation.")
 
