@@ -1,7 +1,7 @@
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from src import potentials, integrator, system, ensemble, conditions
+from ensembler import potentials, integrator, system, ensemble, conditions
 
 try:
     import visualisation

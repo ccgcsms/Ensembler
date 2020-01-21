@@ -22,7 +22,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         self.RE.replicas = {}
 
     def test_init_1DREnsemble(self):
-        from Ensembler.src import ensemble
+        from ensembler import ensemble
         exchange_dimensions = {"temperature": range(288, 310)}
         ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
