@@ -26,7 +26,7 @@ if __name__ == "__main__":
     ##get module import paths - there should be a function for that around
     modules = []
     for test_module in test_files:
-        module_name =  "Ensembler"+test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace("\\", ".").replace(".py", "")
+        module_name =  test_module.replace(os.path.dirname(test_root_dir), "").replace("/", ".").replace("\\", ".").replace(".py", "")
         if(module_name.startswith(".")): module_name = module_name[1:]
         modules.append(module_name)
 
