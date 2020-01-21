@@ -7,9 +7,8 @@ if __name__ == "__main__":
     #include path:
     print("PWD", os.getcwd())
     raw_path = os.getcwd()
-    include_path = raw_path.split("/Ensembler")[0]
-    sys.path.append(include_path)
-    print("sys path append:",include_path)
+    sys.path.append(raw_path)
+    print("sys path append:",raw_path)
 
     #FILE MANAGMENT
     test_root_dir = raw_path.replace("Ensembler", "")
