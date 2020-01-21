@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from Ensembler.src import integrator as integ, potentials as pot, system
+from ensembler import integrator as integ, potentials as pot, system
 
 class test_Integrators(unittest.TestCase):
     pass

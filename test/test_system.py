@@ -3,9 +3,9 @@ import numpy as np
 from numbers import Number
 from collections.abc import Iterable
 
-from Ensembler.src import potentials
-from Ensembler.src import system, integrator
-from Ensembler.src import dataStructure as data
+from ensembler import potentials
+from ensembler import system, integrator
+from ensembler import dataStructure as data
 
 class test_System1D(unittest.TestCase):
     def test_system_constructor(self):

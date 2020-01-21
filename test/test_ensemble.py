@@ -3,8 +3,8 @@ import os ,sys
 sys.path.append(os.path.dirname(__file__)+"/..")
 
 
-from src import system, integrator as integrators, potentials as pot
-from src import ensemble
+from ensembler import system, integrator as integrators, potentials as pot
+from ensembler import ensemble
 
 
 class test_ReplicaExchangeCls(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
-from Ensembler.src import system, conveyorBelt as ensemble, integrator as integ
-from Ensembler.src import potentials as potent
+from ensembler import system, conveyorBelt as ensemble, integrator as integ
+from ensembler import potentials as potent
 
 class testEnsemble(unittest.TestCase):
     def testEnsemble(self):

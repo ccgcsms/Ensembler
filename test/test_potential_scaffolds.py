@@ -6,7 +6,7 @@ from collections.abc import Iterable
 
 sys.path.append(os.path.dirname(__file__+"/../.."))
 
-from  Ensembler.src.potentials._baseclasses import _potential1DCls, _potential2DCls, _potentialNDCls, _potentialNDMultiState
+from  ensembler.potentials._baseclasses import _potential1DCls, _potential2DCls, _potentialNDCls, _potentialNDMultiState
 
 
 """

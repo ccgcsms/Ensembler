@@ -4,7 +4,7 @@ import numpy as np
 
 sys.path.append(os.path.dirname(__file__+"/../.."))
 
-from Ensembler.src.potentials import OneD as pot
+from ensembler.potentials import OneD as pot
 
 """
 TEST for Potentials 1D
