@@ -12,7 +12,7 @@ if __name__ == "__main__":
     print("sys path append:",include_path)
 
     #FILE MANAGMENT
-    test_root_dir = raw_path.replace("Ensembler", "")
+    test_root_dir = raw_path
     print("TEST ROOT DIR: " + test_root_dir)
 
     ##gather all test_files
