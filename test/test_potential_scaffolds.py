@@ -4,7 +4,7 @@ import numpy as np
 from numbers import Number
 from collections.abc import Iterable
 
-sys.path.append(os.path.dirname(__file__+"/../.."))
+sys.path.append(os.path.dirname(__file__+"/.."))
 
 from  ensembler.potentials._baseclasses import _potential1DCls, _potential2DCls, _potentialNDCls, _potentialNDMultiState
 

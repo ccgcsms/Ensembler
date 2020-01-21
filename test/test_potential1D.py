@@ -2,7 +2,7 @@ import os,sys
 import unittest
 import numpy as np
 
-sys.path.append(os.path.dirname(__file__+"/../.."))
+sys.path.append(os.path.dirname(__file__+"/.."))
 
 from ensembler.potentials import OneD as pot
 
