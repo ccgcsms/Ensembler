@@ -27,14 +27,14 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
     def test_init_2DREnsemble(self):
-        from Ensembler.src import ensemble
+        from ensembler import ensemble
         exchange_dimensions = {"temperature": range(288, 310),
                                "mass": range(1,10)}
 
         ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
 
     def test_run_1DREnsemble(self):
-        from Ensembler.src import ensemble
+        from ensembler import ensemble
         exchange_dimensions = {"temperature": range(288, 310)}
 
         group = ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
@@ -44,7 +44,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
         replicas =22
         nsteps = 100
         group = None
-        from Ensembler.src import ensemble
+        from ensembler  import ensemble
         exchange_dimensions = {"temperature": range(288, 310)}
 
         self.group = ensemble.ReplicaExchange(system=self.sys, exchange_dimensions=exchange_dimensions)
@@ -62,7 +62,7 @@ class test_ReplicaExchangeCls(unittest.TestCase):
     def test_getTotPot_1DREnsemble(self):
         replicas =22
         nsteps = 100
-        from Ensembler.src import ensemble
+        from ensembler import ensemble
         exchange_dimensions = {"temperature": range(288, 310)}
 
         self.group = ensemble.ReplicaExchange(system=self.sys,exchange_dimensions=exchange_dimensions)
